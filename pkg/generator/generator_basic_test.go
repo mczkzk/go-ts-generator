@@ -8,16 +8,16 @@ import (
 	"testing"
 )
 
-func TestGenerateTypes(t *testing.T) {
+func TestGenerateBasicTypes(t *testing.T) {
 	// Create a temporary directory for test files
-	tempDir, err := os.MkdirTemp("", "go-ts-generator-test")
+	tempDir, err := os.MkdirTemp("", "go-ts-generator-basic-test")
 	if err != nil {
 		t.Fatalf("Failed to create temp directory: %v", err)
 	}
 	defer os.RemoveAll(tempDir)
 
 	// Create a test Go file
-	goFilePath := filepath.Join(tempDir, "test_types.go")
+	goFilePath := filepath.Join(tempDir, "basic_models.go")
 	goFileContent := `package test
 
 import "time"
