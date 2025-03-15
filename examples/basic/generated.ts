@@ -1,5 +1,5 @@
 // This file is auto-generated. Do not edit directly.
-// Generated at: 2025-03-15 12:34:56
+// Generated at: 2025-03-15 12:37:21
 // Note: This file includes both exported and unexported types and fields.
 
 /* eslint-disable */
@@ -35,7 +35,8 @@ export interface Product {
   name: string;
   description: string;
   price: number;
-  category?: Category; // Pointer type without omitempty is still optional
+  /** Pointer type without omitempty */
+  category?: Category;
   createdAt: string /* RFC3339 */;
 }
 
@@ -66,3 +67,19 @@ export interface UnexportedType {
    */
   field2: number;
 }
+
+/**
+ * UserList represents a list of users
+ */
+export type UserList = (User | undefined)[];
+
+/**
+ * StringArray is a simple string array
+ */
+export type StringArray = string[];
+
+/**
+ * CategoryMap is a map of category IDs to categories
+ */
+export type CategoryMap = Record<number, Category>;
+

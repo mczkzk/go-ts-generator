@@ -41,11 +41,36 @@ type Address struct {
 	Country string ` + "`json:\"country\"`" + `
 }
 
+// Product represents a product in the catalog
+type Product struct {
+	ID          int       ` + "`json:\"id\"`" + `
+	Name        string    ` + "`json:\"name\"`" + `
+	Description string    ` + "`json:\"description\"`" + `
+	Price       float64   ` + "`json:\"price\"`" + `
+	Category    *Category ` + "`json:\"category\"`" + ` // Pointer type without omitempty
+	CreatedAt   time.Time ` + "`json:\"created_at\"`" + `
+}
+
+// Category represents a product category
+type Category struct {
+	ID   int    ` + "`json:\"id\"`" + `
+	Name string ` + "`json:\"name\"`" + `
+}
+
 // unexportedType is not exported
 type unexportedType struct {
 	field1 string ` + "`json:\"field1\"`" + `
 	field2 int    ` + "`json:\"field2\"`" + `
 }
+
+// UserList represents a list of users
+type UserList []*User
+
+// StringArray is a simple string array
+type StringArray []string
+
+// CategoryMap is a map of category IDs to categories
+type CategoryMap map[int]*Category
 `
 
 	if err := os.WriteFile(goFilePath, []byte(goFileContent), 0644); err != nil {
@@ -70,30 +95,46 @@ type unexportedType struct {
 	// Output the generated file content for debugging
 	fmt.Printf("Generated TypeScript content:\n%s\n", tsContentStr)
 
-	// Check for User interface
+	// Check for basic struct conversion
 	if !strings.Contains(tsContentStr, "export interface User {") {
 		t.Error("Generated TypeScript does not contain User interface")
 	}
 
-	// Check for Address interface
 	if !strings.Contains(tsContentStr, "export interface Address {") {
 		t.Error("Generated TypeScript does not contain Address interface")
 	}
 
-	// Check for unexportedType (should be converted to PascalCase)
+	// Check for unexported type handling
 	if !strings.Contains(tsContentStr, "export interface UnexportedType {") {
-		t.Error("Generated TypeScript does not contain UnexportedType interface")
+		t.Error("Generated TypeScript does not convert unexported types to PascalCase")
 	}
 
-	// Check for optional field (address in User)
+	// Check for pointer field handling
 	if !strings.Contains(tsContentStr, "address?: Address;") {
-		t.Error("Generated TypeScript does not handle optional fields correctly")
+		t.Error("Generated TypeScript does not handle pointer fields as optional")
 	}
 
-	// Check for time.Time conversion - field names are converted to camelCase
+	// Check for time.Time conversion and camelCase field names
 	if !strings.Contains(tsContentStr, "createdAt: string /* RFC3339 */;") {
-		t.Error("Generated TypeScript does not handle time.Time correctly")
-		// Output specific content when the test fails
+		t.Error("Generated TypeScript does not handle time.Time correctly or convert field names to camelCase")
 		fmt.Printf("Looking for 'createdAt: string /* RFC3339 */;' in:\n%s\n", tsContentStr)
+	}
+
+	// Check for array of pointers type alias
+	if !strings.Contains(tsContentStr, "export type UserList = (User | undefined)[];") {
+		t.Error("Generated TypeScript does not handle array of pointers type alias correctly")
+		t.Logf("Expected 'export type UserList = (User | undefined)[];' but got something else in:\n%s", tsContentStr)
+	}
+
+	// Check for string array type alias
+	if !strings.Contains(tsContentStr, "export type StringArray = string[];") {
+		t.Error("Generated TypeScript does not handle string array type alias correctly")
+		t.Logf("Expected 'export type StringArray = string[];' but got something else in:\n%s", tsContentStr)
+	}
+
+	// Check for map type alias
+	if !strings.Contains(tsContentStr, "export type CategoryMap = Record<number, Category>;") {
+		t.Error("Generated TypeScript does not handle map type alias correctly")
+		t.Logf("Expected 'export type CategoryMap = Record<number, Category>;' but got something else in:\n%s", tsContentStr)
 	}
 }

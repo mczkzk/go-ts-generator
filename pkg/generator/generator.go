@@ -157,6 +157,33 @@ func ParseGoFiles(sourceDir string) ([]TypeScriptType, error) {
 								}
 
 								types = append(types, tsType)
+							} else {
+								// For non-struct types (type aliases, etc.)
+								tsTypeName := typeSpec.Name.Name
+								tsTypeValue, _ := getTypeString(typeSpec.Type)
+
+								tsType := TypeScriptType{
+									Name:        tsTypeName,
+									IsInterface: false,
+									IsExported:  isExported,
+									IsAPIType:   isAPIFile || strings.Contains(tsTypeName, "Request") || strings.Contains(tsTypeName, "Response") || strings.Contains(tsTypeName, "Params"),
+								}
+
+								// Get comments
+								if genDecl.Doc != nil {
+									tsType.Comment = genDecl.Doc.Text()
+								}
+
+								// Add a single field to represent the type alias
+								tsType.Fields = append(tsType.Fields, TypeScriptField{
+									Name:       "value",
+									Type:       tsTypeValue,
+									Optional:   false,
+									Comment:    "",
+									IsExported: true,
+								})
+
+								types = append(types, tsType)
 							}
 						}
 					}
@@ -196,6 +223,13 @@ func getTypeString(expr ast.Expr) (string, bool) {
 			return typeName, false
 		}
 	case *ast.ArrayType:
+		// Check if the element type is a pointer
+		if starExpr, isPointer := t.Elt.(*ast.StarExpr); isPointer {
+			// For array of pointers, get the base type and make it nullable
+			baseType, _ := getTypeString(starExpr.X)
+			return "(" + baseType + " | undefined)[]", false
+		}
+		// Regular array type
 		elemType, _ := getTypeString(t.Elt)
 		return elemType + "[]", false
 	case *ast.MapType:
@@ -287,17 +321,17 @@ func GenerateTypeScriptTypes(types []TypeScriptType, targetFile string) error {
 			fmt.Fprintln(file, " */")
 		}
 
-		// Write interface definition
-		if t.IsInterface {
-			// Type names are always in PascalCase (to match TypeScript naming conventions)
-			typeName := t.Name
-			if !t.IsExported {
-				// For unexported types, convert to PascalCase
-				if len(typeName) > 0 && unicode.IsLower(rune(typeName[0])) {
-					typeName = strings.ToUpper(typeName[:1]) + typeName[1:]
-				}
+		// Type names are always in PascalCase (to match TypeScript naming conventions)
+		typeName := t.Name
+		if !t.IsExported {
+			// For unexported types, convert to PascalCase
+			if len(typeName) > 0 && unicode.IsLower(rune(typeName[0])) {
+				typeName = strings.ToUpper(typeName[:1]) + typeName[1:]
 			}
+		}
 
+		// Write interface definition or type alias
+		if t.IsInterface {
 			fmt.Fprintf(file, "export interface %s {\n", typeName)
 			for _, field := range t.Fields {
 				// Write field comments
@@ -322,8 +356,14 @@ func GenerateTypeScriptTypes(types []TypeScriptType, targetFile string) error {
 				fmt.Fprintf(file, "  %s%s: %s;\n", field.Name, optionalMark, field.Type)
 			}
 			fmt.Fprintln(file, "}")
-			fmt.Fprintln(file)
+		} else {
+			// For non-interface types (type aliases)
+			if len(t.Fields) > 0 {
+				// Use the type of the "value" field as the type alias
+				fmt.Fprintf(file, "export type %s = %s;\n", typeName, t.Fields[0].Type)
+			}
 		}
+		fmt.Fprintln(file)
 	}
 
 	return nil
@@ -358,6 +398,13 @@ func isBasicType(typeName string) bool {
 
 // typeExists determines if a specified type is defined
 func typeExists(typeName string, types []TypeScriptType) bool {
+	// For array types with nullable elements, extract the base type
+	if strings.HasPrefix(typeName, "(") && strings.HasSuffix(typeName, ")[]") {
+		// Extract the base type from "(Type | undefined)[]"
+		baseType := strings.TrimSuffix(strings.TrimPrefix(typeName, "("), " | undefined)[]")
+		return typeExists(baseType, types)
+	}
+
 	// For array types, check the element type
 	if strings.HasSuffix(typeName, "[]") {
 		return typeExists(strings.TrimSuffix(typeName, "[]"), types)

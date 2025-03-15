@@ -42,3 +42,12 @@ type unexportedType struct {
 	field1 string `json:"field1"`
 	field2 int    `json:"field2"`
 }
+
+// UserList represents a list of users
+type UserList []*User
+
+// StringArray is a simple string array
+type StringArray []string
+
+// CategoryMap is a map of category IDs to categories
+type CategoryMap map[int]*Category
