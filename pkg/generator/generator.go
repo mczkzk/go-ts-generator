@@ -43,6 +43,52 @@ type TypeScriptField struct {
 	Validation []string
 }
 
+// GenerateTypesFromMultipleDirs parses Go files from multiple source directories and generates TypeScript type definitions
+// in the target file.
+func GenerateTypesFromMultipleDirs(sourceDirs []string, targetFile string) error {
+	// Map to store type names and their corresponding TypeScriptType objects
+	typeMap := make(map[string]*TypeScriptType)
+
+	// First pass: collect all type definitions from all directories
+	for _, sourceDir := range sourceDirs {
+		// Collect type definitions from the current source directory
+		types, err := CollectTypeDefinitions(sourceDir)
+		if err != nil {
+			return fmt.Errorf("error collecting type definitions from directory %s: %w", sourceDir, err)
+		}
+
+		// Add types to the map
+		for _, t := range types {
+			if _, exists := typeMap[t.Name]; !exists {
+				typeCopy := t // Create a copy to avoid modifying the original
+				typeMap[t.Name] = &typeCopy
+			}
+		}
+	}
+
+	// Second pass: collect endpoint information from all directories
+	for _, sourceDir := range sourceDirs {
+		// Collect endpoint information from the current source directory
+		err := CollectEndpointInfo(sourceDir, typeMap)
+		if err != nil {
+			return fmt.Errorf("error collecting endpoint information from directory %s: %w", sourceDir, err)
+		}
+	}
+
+	// Convert the map to a slice
+	var allTypes []TypeScriptType
+	for _, t := range typeMap {
+		allTypes = append(allTypes, *t)
+	}
+
+	// Generate TypeScript type definitions from all collected types
+	if err := GenerateTypeScriptTypes(allTypes, targetFile); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // GenerateTypes parses Go files in the source directory and generates TypeScript type definitions
 // in the target file.
 func GenerateTypes(sourceDir, targetFile string) error {
@@ -62,17 +108,45 @@ func GenerateTypes(sourceDir, targetFile string) error {
 
 // ParseGoFiles parses Go files in the source directory and collects TypeScript type information
 func ParseGoFiles(sourceDir string) ([]TypeScriptType, error) {
-	var types []TypeScriptType
-
 	// Map to store type names and their corresponding TypeScriptType objects
 	typeMap := make(map[string]*TypeScriptType)
 
-	// Regular expressions for parsing Swagger/OpenAPI annotations
-	routerRegex := regexp.MustCompile(`@Router\s+([^\s]+)\s+\[([^\]]+)\]`)
-	successRegex := regexp.MustCompile(`@Success\s+\d+\s+\{([^}]+)\}\s+(\S+)`)
-	paramRegex := regexp.MustCompile(`@Param\s+\S+\s+body\s+(\S+)`)
+	// First pass: collect all type definitions
+	types, err := CollectTypeDefinitions(sourceDir)
+	if err != nil {
+		return nil, err
+	}
 
-	// Search for Go files in the source directory
+	// Add types to the map
+	for _, t := range types {
+		typeMap[t.Name] = &t
+	}
+
+	// Second pass: collect endpoint information
+	err = CollectEndpointInfo(sourceDir, typeMap)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert the map values to a slice for the final result
+	result := make([]TypeScriptType, 0, len(types))
+	for _, t := range types {
+		// Add any additional endpoints from the map
+		if mapType, exists := typeMap[t.Name]; exists && len(mapType.Endpoints) > 0 {
+			// Merge endpoints from the map with the ones already in the type
+			t.Endpoints = append(t.Endpoints, mapType.Endpoints...)
+		}
+		result = append(result, t)
+	}
+
+	return result, nil
+}
+
+// CollectTypeDefinitions collects type definitions from Go files in the source directory
+func CollectTypeDefinitions(sourceDir string) ([]TypeScriptType, error) {
+	var types []TypeScriptType
+
+	// Walk through the source directory
 	err := filepath.Walk(sourceDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -90,57 +164,6 @@ func ParseGoFiles(sourceDir string) ([]TypeScriptType, error) {
 
 			// Determine if the file is API-related based on the file path
 			isAPIFile := strings.Contains(path, "controller") || strings.Contains(path, "handler") || strings.Contains(path, "api")
-
-			// Process all comments in the file to find Swagger/OpenAPI annotations
-			for _, commentGroup := range node.Comments {
-				comment := commentGroup.Text()
-
-				// Extract endpoint information from Swagger/OpenAPI annotations
-				routerMatches := routerRegex.FindStringSubmatch(comment)
-				if len(routerMatches) >= 3 {
-					path := routerMatches[1]
-					method := routerMatches[2]
-
-					// Extract response type information
-					successMatches := successRegex.FindAllStringSubmatch(comment, -1)
-					for _, match := range successMatches {
-						if len(match) >= 3 {
-							responseType := match[2]
-							// Remove array prefix if present
-							if strings.HasPrefix(responseType, "[]") {
-								responseType = strings.TrimPrefix(responseType, "[]")
-							}
-
-							// Store endpoint information for this type
-							if typeObj, exists := typeMap[responseType]; exists {
-								typeObj.Endpoints = append(typeObj.Endpoints, EndpointInfo{
-									Method:   method,
-									Path:     path,
-									Response: true,
-									Request:  false,
-								})
-							}
-						}
-					}
-
-					// Extract request body type information
-					paramMatches := paramRegex.FindAllStringSubmatch(comment, -1)
-					for _, match := range paramMatches {
-						if len(match) >= 2 {
-							requestType := match[1]
-							// Store endpoint information for this type
-							if typeObj, exists := typeMap[requestType]; exists {
-								typeObj.Endpoints = append(typeObj.Endpoints, EndpointInfo{
-									Method:   method,
-									Path:     path,
-									Response: false,
-									Request:  true,
-								})
-							}
-						}
-					}
-				}
-			}
 
 			// Collect type definitions
 			for _, decl := range node.Decls {
@@ -170,51 +193,7 @@ func ParseGoFiles(sourceDir string) ([]TypeScriptType, error) {
 								// Get comments
 								if genDecl.Doc != nil {
 									tsType.Comment = genDecl.Doc.Text()
-
-									// Extract endpoint information from type comments
-									routerMatches := routerRegex.FindStringSubmatch(tsType.Comment)
-									if len(routerMatches) >= 3 {
-										path := routerMatches[1]
-										method := routerMatches[2]
-
-										// Extract response type information
-										successMatches := successRegex.FindAllStringSubmatch(tsType.Comment, -1)
-										for _, match := range successMatches {
-											if len(match) >= 3 {
-												responseType := match[2]
-												// Check if this type is mentioned in the response
-												if responseType == tsType.Name || responseType == "[]"+tsType.Name {
-													tsType.Endpoints = append(tsType.Endpoints, EndpointInfo{
-														Method:   method,
-														Path:     path,
-														Response: true,
-														Request:  false,
-													})
-												}
-											}
-										}
-
-										// Extract request body type information
-										paramMatches := paramRegex.FindAllStringSubmatch(tsType.Comment, -1)
-										for _, match := range paramMatches {
-											if len(match) >= 2 {
-												requestType := match[1]
-												// Check if this type is mentioned in the request
-												if requestType == tsType.Name {
-													tsType.Endpoints = append(tsType.Endpoints, EndpointInfo{
-														Method:   method,
-														Path:     path,
-														Response: false,
-														Request:  true,
-													})
-												}
-											}
-										}
-									}
 								}
-
-								// Store the type in the map for later reference
-								typeMap[tsType.Name] = &tsType
 
 								// Collect fields
 								if structType.Fields != nil {
@@ -368,18 +347,92 @@ func ParseGoFiles(sourceDir string) ([]TypeScriptType, error) {
 		return nil, fmt.Errorf("error walking directory: %v", err)
 	}
 
-	// Convert the map values to a slice for the final result
-	result := make([]TypeScriptType, 0, len(types))
-	for _, t := range types {
-		// Add any additional endpoints from the map
-		if mapType, exists := typeMap[t.Name]; exists && len(mapType.Endpoints) > 0 {
-			// Merge endpoints from the map with the ones already in the type
-			t.Endpoints = append(t.Endpoints, mapType.Endpoints...)
+	return types, nil
+}
+
+// CollectEndpointInfo collects endpoint information from Go files in the source directory
+func CollectEndpointInfo(sourceDir string, typeMap map[string]*TypeScriptType) error {
+	// Regular expressions for parsing Swagger/OpenAPI annotations
+	routerRegex := regexp.MustCompile(`@Router\s+([^\s]+)\s+\[([^\]]+)\]`)
+	successRegex := regexp.MustCompile(`@Success\s+\d+\s+\{([^}]+)\}\s+(\S+)`)
+	paramRegex := regexp.MustCompile(`@Param\s+\S+\s+body\s+(\S+)`)
+
+	// Walk through the source directory
+	err := filepath.Walk(sourceDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
 		}
-		result = append(result, t)
+
+		// Process only Go files
+		if !info.IsDir() && strings.HasSuffix(path, ".go") {
+			// Parse the file
+			fset := token.NewFileSet()
+			node, err := parser.ParseFile(fset, path, nil, parser.ParseComments)
+			if err != nil {
+				fmt.Printf("Error parsing file %s: %v\n", path, err)
+				return nil
+			}
+
+			// Process all comments in the file to find Swagger/OpenAPI annotations
+			for _, commentGroup := range node.Comments {
+				comment := commentGroup.Text()
+
+				// Extract endpoint information from Swagger/OpenAPI annotations
+				routerMatches := routerRegex.FindStringSubmatch(comment)
+				if len(routerMatches) >= 3 {
+					path := routerMatches[1]
+					method := routerMatches[2]
+
+					// Extract response type information
+					successMatches := successRegex.FindAllStringSubmatch(comment, -1)
+					for _, match := range successMatches {
+						if len(match) >= 3 {
+							responseType := match[2]
+							// Remove array prefix if present
+							if strings.HasPrefix(responseType, "[]") {
+								responseType = strings.TrimPrefix(responseType, "[]")
+							}
+
+							// Store endpoint information for this type
+							if typeObj, exists := typeMap[responseType]; exists {
+								typeObj.Endpoints = append(typeObj.Endpoints, EndpointInfo{
+									Method:   method,
+									Path:     path,
+									Response: true,
+									Request:  false,
+								})
+							}
+						}
+					}
+
+					// Extract request body type information
+					paramMatches := paramRegex.FindAllStringSubmatch(comment, -1)
+					for _, match := range paramMatches {
+						if len(match) >= 2 {
+							requestType := match[1]
+
+							// Store endpoint information for this type
+							if typeObj, exists := typeMap[requestType]; exists {
+								typeObj.Endpoints = append(typeObj.Endpoints, EndpointInfo{
+									Method:   method,
+									Path:     path,
+									Response: false,
+									Request:  true,
+								})
+							}
+						}
+					}
+				}
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		return fmt.Errorf("error walking directory for endpoint information: %v", err)
 	}
 
-	return result, nil
+	return nil
 }
 
 // getTypeString gets a TypeScript type string from a Go type expression

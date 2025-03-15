@@ -16,6 +16,7 @@ A Go module that generates TypeScript type definitions from Go struct definition
 - Handles arrays of pointers as `(Type | null | undefined)[]` in TypeScript
 - Includes validation rules from struct tags as JSDoc comments
 - Parses Swagger/OpenAPI annotations to add API endpoint information to type comments
+- Supports processing multiple source directories in a single command
 
 ## Installation
 
@@ -36,16 +37,20 @@ go get github.com/mo49/go-ts-generator
 ### Command-line
 
 ```bash
-go-ts-generator <source_dir> <target_file>
+go-ts-generator <source_dirs> <target_file>
 ```
 
 Where:
-- `<source_dir>` is the directory containing Go files to parse
+- `<source_dirs>` is a comma-separated list of directories containing Go files to parse
 - `<target_file>` is the target TypeScript file to generate
 
-Example:
+Examples:
 ```bash
+# Single directory
 go-ts-generator ./models ./types/generated.ts
+
+# Multiple directories
+go-ts-generator ./models,./api,./controllers ./types/generated.ts
 ```
 
 ### As a library
@@ -59,7 +64,15 @@ import (
 )
 
 func main() {
+	// Generate from a single directory
 	err := generator.GenerateTypes("./models", "./types/generated.ts")
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+	}
+	
+	// Or generate from multiple directories
+	sourceDirs := []string{"./models", "./api", "./controllers"}
+	err = generator.GenerateTypesFromMultipleDirs(sourceDirs, "./types/generated.ts")
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 	}
@@ -71,6 +84,7 @@ func main() {
 Check out the [examples](./examples) directory for complete usage examples:
 - [Basic examples](./examples/basic) - Standard Go structs and their TypeScript equivalents
 - [API examples](./examples/api) - API-related types with preserved field names
+- [Swagger examples](./examples/swagger) - Swagger/OpenAPI annotations for API documentation
 
 ## Type Conversion
 

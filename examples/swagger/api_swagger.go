@@ -1,4 +1,4 @@
-package api
+package swagger
 
 // UserController contains API handlers for user operations
 

@@ -14,12 +14,6 @@ Files:
 - `models.go` - Go struct definitions
 - `generated.ts` - Generated TypeScript type definitions
 
-To generate TypeScript types from these models:
-
-```bash
-go-ts-generator ./examples/basic ./examples/basic/generated.ts
-```
-
 ## API Example
 
 The `api` directory contains API-related structs that demonstrate:
@@ -31,29 +25,36 @@ Files:
 - `api_models.go` - Go struct definitions for API-related types
 - `generated.ts` - Generated TypeScript type definitions
 
-To generate TypeScript types from these API models:
+## Swagger Example
 
-```bash
-go-ts-generator ./examples/api ./examples/api/generated.ts
-```
+The `swagger` directory contains Swagger/OpenAPI annotations that demonstrate:
+- Extraction of API endpoint information from Swagger comments
+- Association of types with their usage in API endpoints
 
-## Running the Examples
+Files:
+- `api_swagger.go` - Go file with Swagger/OpenAPI annotations
 
-You can run both examples with:
+## Usage
+
+You can generate TypeScript types from one or multiple directories:
 
 ```bash
 # Install the tool
 go install github.com/mo49/go-ts-generator/cmd/go-ts-generator@latest
 
-# Generate TypeScript types for basic models
+# Generate from a single directory
 go-ts-generator ./examples/basic ./examples/basic/generated.ts
-
-# Generate TypeScript types for API models
 go-ts-generator ./examples/api ./examples/api/generated.ts
+
+# Generate from multiple directories
+go-ts-generator ./examples/api,./examples/swagger ./examples/combined_output.ts
 ```
 
-The generated TypeScript files will show how different Go types are converted to TypeScript.
+When using multiple directories, the tool will:
+- Collect all type definitions from all specified directories
+- Combine related information (like Swagger annotations with their types)
+- Generate a single TypeScript file with complete type definitions
 
 ## Pre-generated Files
 
-For convenience, this repository includes pre-generated TypeScript files (`generated.ts`) in both example directories. These files show the expected output of the tool when run on the example Go files. 
+For convenience, this repository includes pre-generated TypeScript files (`generated.ts`) in the example directories. These files show the expected output of the tool when run on the example Go files. 
