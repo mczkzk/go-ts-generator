@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2025-03-15
+
+### Added
+- Support for form, param tags in addition to json and query tags
+- Prioritization of tags in the order: json > form > param > query
+- Improved JSDoc comments with validation rules from struct tags
+
+### Changed
+- Improved documentation with clearer examples
+- Streamlined README.md by removing redundancies
+- Enhanced handling of unexported types and fields
+
 ## [0.2.0] - 2025-03-15
 
 ### Added
