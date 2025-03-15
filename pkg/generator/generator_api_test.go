@@ -243,3 +243,92 @@ type FileUploadForm struct {
 		t.Logf("Expected 'images?: FileHeader[];' but got something else in:\n%s", tsContentStr)
 	}
 }
+
+// TestGenerateParamTagTypes tests the generation of TypeScript types from Go structs with param tags
+func TestGenerateParamTagTypes(t *testing.T) {
+	// Create a temporary directory for test files
+	tempDir, err := os.MkdirTemp("", "go-ts-generator-param-test")
+	if err != nil {
+		t.Fatalf("Failed to create temp directory: %v", err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	// Create a test Go file with param tags
+	goFilePath := filepath.Join(tempDir, "param_models.go")
+	goFileContent := `package param
+
+// RouteParams represents URL parameters in a route
+type RouteParams struct {
+	UserID     int64  ` + "`param:\"user_id\" json:\"id\"`" + `
+	PostID     int64  ` + "`param:\"post_id\" json:\"postId\"`" + `
+	CommentID  string ` + "`param:\"comment_id\" json:\"commentId\"`" + `
+	CategoryID string ` + "`param:\"category_id\"`" + `
+}
+
+// MixedParamStruct demonstrates priority between param and json tags
+type MixedParamStruct struct {
+	ID        int64  ` + "`json:\"id\" param:\"user_id\"`" + `
+	Name      string ` + "`json:\"name\" param:\"user_name\"`" + `
+	JSONOnly  string ` + "`json:\"json_only\"`" + `
+	ParamOnly string ` + "`param:\"param_only\"`" + `
+}
+`
+
+	if err := os.WriteFile(goFilePath, []byte(goFileContent), 0644); err != nil {
+		t.Fatalf("Failed to write test Go file: %v", err)
+	}
+
+	// Generate TypeScript types
+	tsFilePath := filepath.Join(tempDir, "generated.ts")
+	if err := GenerateTypes(tempDir, tsFilePath); err != nil {
+		t.Fatalf("GenerateTypes failed: %v", err)
+	}
+
+	// Read the generated TypeScript file
+	tsContent, err := os.ReadFile(tsFilePath)
+	if err != nil {
+		t.Fatalf("Failed to read generated TypeScript file: %v", err)
+	}
+
+	// Check for expected content
+	tsContentStr := string(tsContent)
+
+	// Check for param tag usage in RouteParams
+	if !strings.Contains(tsContentStr, "user_id: number;") {
+		t.Error("Generated TypeScript does not use param tag for field name in RouteParams")
+		t.Logf("Expected 'user_id: number;' but got something else in:\n%s", tsContentStr)
+	}
+
+	if !strings.Contains(tsContentStr, "post_id: number;") {
+		t.Error("Generated TypeScript does not use param tag for field name in RouteParams")
+		t.Logf("Expected 'post_id: number;' but got something else in:\n%s", tsContentStr)
+	}
+
+	if !strings.Contains(tsContentStr, "comment_id: string;") {
+		t.Error("Generated TypeScript does not use param tag for field name in RouteParams")
+		t.Logf("Expected 'comment_id: string;' but got something else in:\n%s", tsContentStr)
+	}
+
+	// Check for param tag priority in MixedParamStruct
+	if !strings.Contains(tsContentStr, "user_id: number;") {
+		t.Error("Generated TypeScript does not prioritize param tag over json tag")
+		t.Logf("Expected 'user_id: number;' but got something else in:\n%s", tsContentStr)
+	}
+
+	if !strings.Contains(tsContentStr, "user_name: string;") {
+		t.Error("Generated TypeScript does not prioritize param tag over json tag")
+		t.Logf("Expected 'user_name: string;' but got something else in:\n%s", tsContentStr)
+	}
+
+	// Check for json-only field
+	if !strings.Contains(tsContentStr, "json_only: string;") {
+		t.Error("Generated TypeScript does not handle json-only tag correctly")
+		t.Logf("Expected 'json_only: string;' but got something else in:\n%s", tsContentStr)
+	}
+
+	// Check for param-only field
+	if !strings.Contains(tsContentStr, "param_only: string;") {
+		t.Error("Generated TypeScript does not handle param-only tag correctly")
+		t.Logf("Expected 'param_only: string;' but got something else in:\n%s", tsContentStr)
+	}
+}

@@ -86,7 +86,11 @@ func ParseGoFiles(sourceDir string) ([]TypeScriptType, error) {
 									Name:        typeSpec.Name.Name,
 									IsInterface: true,
 									IsExported:  isExported,
-									IsAPIType:   isAPIFile || strings.Contains(typeSpec.Name.Name, "Request") || strings.Contains(typeSpec.Name.Name, "Response") || strings.Contains(typeSpec.Name.Name, "Params"),
+									IsAPIType: isAPIFile ||
+										strings.Contains(typeSpec.Name.Name, "Request") ||
+										strings.Contains(typeSpec.Name.Name, "Response") ||
+										strings.Contains(typeSpec.Name.Name, "Params") ||
+										strings.Contains(typeSpec.Name.Name, "Param"),
 								}
 
 								// Get comments
@@ -110,14 +114,19 @@ func ParseGoFiles(sourceDir string) ([]TypeScriptType, error) {
 												fieldComment = field.Comment.Text()
 											}
 
-											// Parse JSON tags
+											// Parse tags
 											jsonName := fieldName
 											optional := isPointer // Pointer types are optional
 											if field.Tag != nil {
 												tag := strings.Trim(field.Tag.Value, "`")
 
-												// Parse form tags first (highest priority)
+												// Parse tags in order of priority: form, param, json, query
 												formTag := extractTag(tag, "form")
+												paramTag := extractTag(tag, "param")
+												jsonTag := extractTag(tag, "json")
+												queryTag := extractTag(tag, "query")
+
+												// First priority: form tag
 												if formTag != "" {
 													parts := strings.Split(formTag, ",")
 													if parts[0] != "" && parts[0] != "-" {
@@ -128,28 +137,37 @@ func ParseGoFiles(sourceDir string) ([]TypeScriptType, error) {
 															optional = true
 														}
 													}
-												} else {
-													// Parse JSON tags if no form tag is present
-													jsonTag := extractTag(tag, "json")
-													if jsonTag != "" {
-														parts := strings.Split(jsonTag, ",")
-														if parts[0] != "" && parts[0] != "-" {
-															jsonName = parts[0]
-														}
-														for _, part := range parts[1:] {
-															if part == "omitempty" {
-																optional = true
-															}
+												} else if paramTag != "" {
+													// Second priority: param tag
+													parts := strings.Split(paramTag, ",")
+													if parts[0] != "" && parts[0] != "-" {
+														jsonName = parts[0]
+													}
+													for _, part := range parts[1:] {
+														if part == "omitempty" {
+															optional = true
 														}
 													}
-
-													// Parse query tags as well
-													queryTag := extractTag(tag, "query")
-													if queryTag != "" && jsonName == fieldName {
-														// Use query tag if no JSON tag is present
-														parts := strings.Split(queryTag, ",")
-														if parts[0] != "" && parts[0] != "-" {
-															jsonName = parts[0]
+												} else if jsonTag != "" {
+													// Third priority: json tag
+													parts := strings.Split(jsonTag, ",")
+													if parts[0] != "" && parts[0] != "-" {
+														jsonName = parts[0]
+													}
+													for _, part := range parts[1:] {
+														if part == "omitempty" {
+															optional = true
+														}
+													}
+												} else if queryTag != "" {
+													// Fourth priority: query tag
+													parts := strings.Split(queryTag, ",")
+													if parts[0] != "" && parts[0] != "-" {
+														jsonName = parts[0]
+													}
+													for _, part := range parts[1:] {
+														if part == "omitempty" {
+															optional = true
 														}
 													}
 												}

@@ -1,5 +1,5 @@
 // This file is auto-generated. Do not edit directly.
-// Generated at: 2025-03-15 14:13:15
+// Generated at: 2025-03-15 14:29:20
 // Note: This file includes both exported and unexported types and fields.
 
 /* eslint-disable */
@@ -93,5 +93,25 @@ export interface FileUploadForm {
   description: string;
   file?: FileHeader;
   images: FileHeader[];
+}
+
+/**
+ * RouteParams represents URL parameters in a route
+ */
+export interface RouteParams {
+  user_id: number;
+  post_id: number;
+  comment_id: string;
+  category_id: string;
+}
+
+/**
+ * MixedParamStruct demonstrates priority between param and json tags
+ */
+export interface MixedParamStruct {
+  user_id: number;
+  user_name: string;
+  json_only: string;
+  param_only: string;
 }
 

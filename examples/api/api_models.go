@@ -76,3 +76,19 @@ type FileUploadForm struct {
 	File        *multipart.FileHeader   `form:"file"`
 	Images      []*multipart.FileHeader `form:"images"`
 }
+
+// RouteParams represents URL parameters in a route
+type RouteParams struct {
+	UserID     int64  `param:"user_id" json:"id"`
+	PostID     int64  `param:"post_id" json:"postId"`
+	CommentID  string `param:"comment_id" json:"commentId"`
+	CategoryID string `param:"category_id"`
+}
+
+// MixedParamStruct demonstrates priority between param and json tags
+type MixedParamStruct struct {
+	ID        int64  `json:"id" param:"user_id"`
+	Name      string `json:"name" param:"user_name"`
+	JSONOnly  string `json:"json_only"`
+	ParamOnly string `param:"param_only"`
+}
