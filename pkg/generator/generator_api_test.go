@@ -116,3 +116,130 @@ type SearchParams struct {
 		t.Logf("Expected 'street_line2?: string;' but got something else in:\n%s", tsContentStr)
 	}
 }
+
+// TestGenerateFormTagTypes tests the generation of TypeScript types from Go structs with form tags
+func TestGenerateFormTagTypes(t *testing.T) {
+	// Create a temporary directory for test files
+	tempDir, err := os.MkdirTemp("", "go-ts-generator-form-test")
+	if err != nil {
+		t.Fatalf("Failed to create temp directory: %v", err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	// Create a test Go file with form tags
+	goFilePath := filepath.Join(tempDir, "form_models.go")
+	goFileContent := `package form
+
+import "mime/multipart"
+
+// LoginForm represents a login form submission
+type LoginForm struct {
+	Username string ` + "`form:\"username\" json:\"user\"`" + `
+	Password string ` + "`form:\"password\" json:\"pass\"`" + `
+	Remember bool   ` + "`form:\"remember_me\" json:\"remember\"`" + `
+}
+
+// RegisterForm represents a user registration form
+type RegisterForm struct {
+	Username        string ` + "`form:\"username\" json:\"username\"`" + `
+	Email           string ` + "`form:\"email\" json:\"email\"`" + `
+	Password        string ` + "`form:\"password\" json:\"password\"`" + `
+	ConfirmPassword string ` + "`form:\"confirm_password\" json:\"confirm_password\"`" + `
+	AcceptTerms     bool   ` + "`form:\"accept_terms\" json:\"accept_terms\"`" + `
+}
+
+// MixedTagsStruct demonstrates priority between JSON and form tags
+type MixedTagsStruct struct {
+	ID       int64  ` + "`json:\"id\" form:\"user_id\"`" + `
+	Name     string ` + "`json:\"name\" form:\"user_name\"`" + `
+	Email    string ` + "`json:\"email\" form:\"user_email\"`" + `
+	JSONOnly string ` + "`json:\"json_only\"`" + `
+	FormOnly string ` + "`form:\"form_only\"`" + `
+	NoTags   string
+}
+
+// FileUploadForm represents a form with file uploads
+type FileUploadForm struct {
+	UserID      int64                 ` + "`form:\"user_id\"`" + `
+	Title       string                ` + "`form:\"title\"`" + `
+	Description string                ` + "`form:\"description\"`" + `
+	File        *multipart.FileHeader ` + "`form:\"file\"`" + `
+	Images      []*multipart.FileHeader ` + "`form:\"images\"`" + `
+}
+`
+
+	if err := os.WriteFile(goFilePath, []byte(goFileContent), 0644); err != nil {
+		t.Fatalf("Failed to write test Go file: %v", err)
+	}
+
+	// Generate TypeScript types
+	tsFilePath := filepath.Join(tempDir, "generated.ts")
+	if err := GenerateTypes(tempDir, tsFilePath); err != nil {
+		t.Fatalf("GenerateTypes failed: %v", err)
+	}
+
+	// Read the generated TypeScript file
+	tsContent, err := os.ReadFile(tsFilePath)
+	if err != nil {
+		t.Fatalf("Failed to read generated TypeScript file: %v", err)
+	}
+
+	// Check for expected content
+	tsContentStr := string(tsContent)
+
+	// Check for form tag usage in LoginForm
+	if !strings.Contains(tsContentStr, "username: string;") {
+		t.Error("Generated TypeScript does not use form tag for field name in LoginForm")
+		t.Logf("Expected 'username: string;' but got something else in:\n%s", tsContentStr)
+	}
+
+	if !strings.Contains(tsContentStr, "password: string;") {
+		t.Error("Generated TypeScript does not use form tag for field name in LoginForm")
+		t.Logf("Expected 'password: string;' but got something else in:\n%s", tsContentStr)
+	}
+
+	if !strings.Contains(tsContentStr, "remember_me: boolean;") {
+		t.Error("Generated TypeScript does not use form tag for field name in LoginForm")
+		t.Logf("Expected 'remember_me: boolean;' but got something else in:\n%s", tsContentStr)
+	}
+
+	// Check for form tag usage in RegisterForm
+	if !strings.Contains(tsContentStr, "confirm_password: string;") {
+		t.Error("Generated TypeScript does not use form tag for field name in RegisterForm")
+		t.Logf("Expected 'confirm_password: string;' but got something else in:\n%s", tsContentStr)
+	}
+
+	// Check for form tag priority in MixedTagsStruct
+	if !strings.Contains(tsContentStr, "user_id: number;") {
+		t.Error("Generated TypeScript does not prioritize form tag over json tag")
+		t.Logf("Expected 'user_id: number;' but got something else in:\n%s", tsContentStr)
+	}
+
+	if !strings.Contains(tsContentStr, "user_name: string;") {
+		t.Error("Generated TypeScript does not prioritize form tag over json tag")
+		t.Logf("Expected 'user_name: string;' but got something else in:\n%s", tsContentStr)
+	}
+
+	// Check for json-only field
+	if !strings.Contains(tsContentStr, "json_only: string;") {
+		t.Error("Generated TypeScript does not handle json-only tag correctly")
+		t.Logf("Expected 'json_only: string;' but got something else in:\n%s", tsContentStr)
+	}
+
+	// Check for form-only field
+	if !strings.Contains(tsContentStr, "form_only: string;") {
+		t.Error("Generated TypeScript does not handle form-only tag correctly")
+		t.Logf("Expected 'form_only: string;' but got something else in:\n%s", tsContentStr)
+	}
+
+	// Check for FileUploadForm fields
+	if !strings.Contains(tsContentStr, "file?: FileHeader;") {
+		t.Error("Generated TypeScript does not handle file upload field correctly")
+		t.Logf("Expected 'file?: FileHeader;' but got something else in:\n%s", tsContentStr)
+	}
+
+	if !strings.Contains(tsContentStr, "images?: FileHeader[];") {
+		t.Error("Generated TypeScript does not handle multiple file upload field correctly")
+		t.Logf("Expected 'images?: FileHeader[];' but got something else in:\n%s", tsContentStr)
+	}
+}

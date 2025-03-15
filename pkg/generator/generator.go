@@ -115,9 +115,11 @@ func ParseGoFiles(sourceDir string) ([]TypeScriptType, error) {
 											optional := isPointer // Pointer types are optional
 											if field.Tag != nil {
 												tag := strings.Trim(field.Tag.Value, "`")
-												jsonTag := extractTag(tag, "json")
-												if jsonTag != "" {
-													parts := strings.Split(jsonTag, ",")
+
+												// Parse form tags first (highest priority)
+												formTag := extractTag(tag, "form")
+												if formTag != "" {
+													parts := strings.Split(formTag, ",")
 													if parts[0] != "" && parts[0] != "-" {
 														jsonName = parts[0]
 													}
@@ -126,15 +128,29 @@ func ParseGoFiles(sourceDir string) ([]TypeScriptType, error) {
 															optional = true
 														}
 													}
-												}
+												} else {
+													// Parse JSON tags if no form tag is present
+													jsonTag := extractTag(tag, "json")
+													if jsonTag != "" {
+														parts := strings.Split(jsonTag, ",")
+														if parts[0] != "" && parts[0] != "-" {
+															jsonName = parts[0]
+														}
+														for _, part := range parts[1:] {
+															if part == "omitempty" {
+																optional = true
+															}
+														}
+													}
 
-												// Parse query tags as well
-												queryTag := extractTag(tag, "query")
-												if queryTag != "" && jsonName == fieldName {
-													// Use query tag if no JSON tag is present
-													parts := strings.Split(queryTag, ",")
-													if parts[0] != "" && parts[0] != "-" {
-														jsonName = parts[0]
+													// Parse query tags as well
+													queryTag := extractTag(tag, "query")
+													if queryTag != "" && jsonName == fieldName {
+														// Use query tag if no JSON tag is present
+														parts := strings.Split(queryTag, ",")
+														if parts[0] != "" && parts[0] != "-" {
+															jsonName = parts[0]
+														}
 													}
 												}
 											}
@@ -225,9 +241,10 @@ func getTypeString(expr ast.Expr) (string, bool) {
 	case *ast.ArrayType:
 		// Check if the element type is a pointer
 		if starExpr, isPointer := t.Elt.(*ast.StarExpr); isPointer {
-			// For array of pointers, get the base type and make it nullable
+			// For array of pointers, get the base type and make it optional
 			baseType, _ := getTypeString(starExpr.X)
-			return "(" + baseType + " | undefined)[]", false
+			// Return as a simple array type, treating elements as optional
+			return baseType + "[]", false
 		}
 		// Regular array type
 		elemType, _ := getTypeString(t.Elt)
@@ -295,8 +312,34 @@ func GenerateTypeScriptTypes(types []TypeScriptType, targetFile string) error {
 	// Write placeholders for undefined types
 	if len(undefinedTypes) > 0 {
 		fmt.Fprintln(file, "// Placeholders for undefined types")
+		// Avoid duplicates by extracting base types from array types
+		processedTypes := make(map[string]bool)
+
+		// Process non-array types first
 		for typeName := range undefinedTypes {
-			fmt.Fprintf(file, "type %s = any;\n", typeName)
+			if !strings.HasSuffix(typeName, "[]") && !strings.HasPrefix(typeName, "(") {
+				fmt.Fprintf(file, "type %s = any;\n", typeName)
+				processedTypes[typeName] = true
+			}
+		}
+
+		// Then process array types
+		for typeName := range undefinedTypes {
+			if strings.HasPrefix(typeName, "(") && strings.HasSuffix(typeName, ")[]") {
+				// Extract base type from "(Type | undefined)[]" format
+				baseType := strings.TrimSuffix(strings.TrimPrefix(typeName, "("), " | undefined)[]")
+				if !processedTypes[baseType] {
+					fmt.Fprintf(file, "type %s = any;\n", baseType)
+					processedTypes[baseType] = true
+				}
+			} else if strings.HasSuffix(typeName, "[]") {
+				// Extract base type from array type
+				baseType := strings.TrimSuffix(typeName, "[]")
+				if !processedTypes[baseType] {
+					fmt.Fprintf(file, "type %s = any;\n", baseType)
+					processedTypes[baseType] = true
+				}
+			}
 		}
 		fmt.Fprintln(file, "")
 	}
