@@ -5,7 +5,7 @@ A Go module that generates TypeScript type definitions from Go struct definition
 ## Features
 
 - Automatically generates TypeScript interfaces from Go structs
-- Handles JSON and query tag parsing for field names
+- Handles JSON, form, param, and query tag parsing for field names (prioritized in that order)
 - Converts Go types to appropriate TypeScript types
 - Preserves comments from Go code in the generated TypeScript
 - Handles both exported and unexported types and fields
@@ -13,7 +13,6 @@ A Go module that generates TypeScript type definitions from Go struct definition
 - Special handling for API-related types (preserves exact field names)
 - Handles pointer types as optional fields
 - Supports `omitempty` tag for optional fields
-- Prioritizes tags in the following order: `json` > `form` > `param` > `query`
 - Handles arrays of pointers as `(Type | null | undefined)[]` in TypeScript
 - Includes validation rules from struct tags as JSDoc comments
 
@@ -154,13 +153,7 @@ export interface UnexportedType {
 }
 ```
 
-For more detailed examples including:
-- Pointer types without `omitempty`
-- API-related types with preserved field names
-- Query tag handling
-- Unexported types and fields
-
-Please see the [examples](./examples) directory.
+For more detailed examples, please see the [examples](./examples) directory.
 
 ## License
 
