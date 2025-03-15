@@ -105,7 +105,7 @@ type Address struct {
 
 ```typescript
 // This file is auto-generated. Do not edit directly.
-// Generated at: 2023-04-01 12:34:56
+// Generated at: 2025-03-15 12:34:56
 // Note: This file includes both exported and unexported types and fields.
 
 /* eslint-disable */
@@ -117,8 +117,8 @@ export interface User {
   id: number;
   name: string;
   email: string;
-  created_at: string /* RFC3339 */;
-  updated_at: string /* RFC3339 */;
+  createdAt: string /* RFC3339 */;
+  updatedAt: string /* RFC3339 */;
   address?: Address;
 }
 
@@ -129,8 +129,34 @@ export interface Address {
   street: string;
   city: string;
   state: string;
-  zip_code: string;
+  zipCode: string;
   country: string;
+}
+```
+
+### API Type Example
+
+For API-related types (file paths containing `controller`, `handler`, `api`, or type names containing `Request`, `Response`, `Params`), field names are preserved as-is:
+
+```go
+// UserResponse represents an API response
+type UserResponse struct {
+	User_ID    int       `json:"user_id"`
+	First_Name string    `json:"first_name"`
+	Last_Name  string    `json:"last_name"`
+	Created_At time.Time `json:"created_at"`
+}
+```
+
+```typescript
+/**
+ * UserResponse represents an API response
+ */
+export interface UserResponse {
+  user_id: number;
+  first_name: string;
+  last_name: string;
+  created_at: string /* RFC3339 */;
 }
 ```
 

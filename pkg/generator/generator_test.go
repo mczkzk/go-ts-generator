@@ -1,6 +1,7 @@
 package generator
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -66,6 +67,9 @@ type unexportedType struct {
 	// Check for expected content
 	tsContentStr := string(tsContent)
 
+	// Output the generated file content for debugging
+	fmt.Printf("Generated TypeScript content:\n%s\n", tsContentStr)
+
 	// Check for User interface
 	if !strings.Contains(tsContentStr, "export interface User {") {
 		t.Error("Generated TypeScript does not contain User interface")
@@ -86,8 +90,10 @@ type unexportedType struct {
 		t.Error("Generated TypeScript does not handle optional fields correctly")
 	}
 
-	// Check for time.Time conversion
-	if !strings.Contains(tsContentStr, "created_at: string /* RFC3339 */;") {
+	// Check for time.Time conversion - field names are converted to camelCase
+	if !strings.Contains(tsContentStr, "createdAt: string /* RFC3339 */;") {
 		t.Error("Generated TypeScript does not handle time.Time correctly")
+		// Output specific content when the test fails
+		fmt.Printf("Looking for 'createdAt: string /* RFC3339 */;' in:\n%s\n", tsContentStr)
 	}
 }
