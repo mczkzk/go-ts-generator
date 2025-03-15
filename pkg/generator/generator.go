@@ -140,14 +140,25 @@ func ParseGoFiles(sourceDir string) ([]TypeScriptType, error) {
 													validationRules = append(validationRules, "validate: "+validateTag)
 												}
 
-												// Parse tags in order of priority: form, param, json, query
+												// Parse tags in order of priority: json, form, param, query
+												jsonTag := extractTag(tag, "json")
 												formTag := extractTag(tag, "form")
 												paramTag := extractTag(tag, "param")
-												jsonTag := extractTag(tag, "json")
 												queryTag := extractTag(tag, "query")
 
-												// First priority: form tag
-												if formTag != "" {
+												// First priority: json tag
+												if jsonTag != "" {
+													parts := strings.Split(jsonTag, ",")
+													if parts[0] != "" && parts[0] != "-" {
+														jsonName = parts[0]
+													}
+													for _, part := range parts[1:] {
+														if part == "omitempty" {
+															optional = true
+														}
+													}
+												} else if formTag != "" {
+													// Second priority: form tag
 													parts := strings.Split(formTag, ",")
 													if parts[0] != "" && parts[0] != "-" {
 														jsonName = parts[0]
@@ -158,19 +169,8 @@ func ParseGoFiles(sourceDir string) ([]TypeScriptType, error) {
 														}
 													}
 												} else if paramTag != "" {
-													// Second priority: param tag
+													// Third priority: param tag
 													parts := strings.Split(paramTag, ",")
-													if parts[0] != "" && parts[0] != "-" {
-														jsonName = parts[0]
-													}
-													for _, part := range parts[1:] {
-														if part == "omitempty" {
-															optional = true
-														}
-													}
-												} else if jsonTag != "" {
-													// Third priority: json tag
-													parts := strings.Split(jsonTag, ",")
 													if parts[0] != "" && parts[0] != "-" {
 														jsonName = parts[0]
 													}

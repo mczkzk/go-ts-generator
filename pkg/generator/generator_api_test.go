@@ -188,19 +188,19 @@ type FileUploadForm struct {
 	tsContentStr := string(tsContent)
 
 	// Check for form tag usage in LoginForm
-	if !strings.Contains(tsContentStr, "username: string;") {
-		t.Error("Generated TypeScript does not use form tag for field name in LoginForm")
-		t.Logf("Expected 'username: string;' but got something else in:\n%s", tsContentStr)
+	if !strings.Contains(tsContentStr, "user: string;") {
+		t.Error("Generated TypeScript does not use json tag for field name in LoginForm")
+		t.Logf("Expected 'user: string;' but got something else in:\n%s", tsContentStr)
 	}
 
-	if !strings.Contains(tsContentStr, "password: string;") {
-		t.Error("Generated TypeScript does not use form tag for field name in LoginForm")
-		t.Logf("Expected 'password: string;' but got something else in:\n%s", tsContentStr)
+	if !strings.Contains(tsContentStr, "pass: string;") {
+		t.Error("Generated TypeScript does not use json tag for field name in LoginForm")
+		t.Logf("Expected 'pass: string;' but got something else in:\n%s", tsContentStr)
 	}
 
-	if !strings.Contains(tsContentStr, "remember_me: boolean;") {
-		t.Error("Generated TypeScript does not use form tag for field name in LoginForm")
-		t.Logf("Expected 'remember_me: boolean;' but got something else in:\n%s", tsContentStr)
+	if !strings.Contains(tsContentStr, "remember: boolean;") {
+		t.Error("Generated TypeScript does not use json tag for field name in LoginForm")
+		t.Logf("Expected 'remember: boolean;' but got something else in:\n%s", tsContentStr)
 	}
 
 	// Check for form tag usage in RegisterForm
@@ -209,15 +209,15 @@ type FileUploadForm struct {
 		t.Logf("Expected 'confirm_password: string;' but got something else in:\n%s", tsContentStr)
 	}
 
-	// Check for form tag priority in MixedTagsStruct
-	if !strings.Contains(tsContentStr, "user_id: number;") {
-		t.Error("Generated TypeScript does not prioritize form tag over json tag")
-		t.Logf("Expected 'user_id: number;' but got something else in:\n%s", tsContentStr)
+	// Check for json tag priority in MixedTagsStruct
+	if !strings.Contains(tsContentStr, "id: number;") {
+		t.Error("Generated TypeScript does not prioritize json tag over form tag")
+		t.Logf("Expected 'id: number;' but got something else in:\n%s", tsContentStr)
 	}
 
-	if !strings.Contains(tsContentStr, "user_name: string;") {
-		t.Error("Generated TypeScript does not prioritize form tag over json tag")
-		t.Logf("Expected 'user_name: string;' but got something else in:\n%s", tsContentStr)
+	if !strings.Contains(tsContentStr, "name: string;") {
+		t.Error("Generated TypeScript does not prioritize json tag over form tag")
+		t.Logf("Expected 'name: string;' but got something else in:\n%s", tsContentStr)
 	}
 
 	// Check for json-only field
@@ -294,30 +294,30 @@ type MixedParamStruct struct {
 	tsContentStr := string(tsContent)
 
 	// Check for param tag usage in RouteParams
-	if !strings.Contains(tsContentStr, "user_id: number;") {
-		t.Error("Generated TypeScript does not use param tag for field name in RouteParams")
-		t.Logf("Expected 'user_id: number;' but got something else in:\n%s", tsContentStr)
+	if !strings.Contains(tsContentStr, "id: number;") {
+		t.Error("Generated TypeScript does not use json tag for field name in RouteParams")
+		t.Logf("Expected 'id: number;' but got something else in:\n%s", tsContentStr)
 	}
 
-	if !strings.Contains(tsContentStr, "post_id: number;") {
-		t.Error("Generated TypeScript does not use param tag for field name in RouteParams")
-		t.Logf("Expected 'post_id: number;' but got something else in:\n%s", tsContentStr)
+	if !strings.Contains(tsContentStr, "postId: number;") {
+		t.Error("Generated TypeScript does not use json tag for field name in RouteParams")
+		t.Logf("Expected 'postId: number;' but got something else in:\n%s", tsContentStr)
 	}
 
-	if !strings.Contains(tsContentStr, "comment_id: string;") {
-		t.Error("Generated TypeScript does not use param tag for field name in RouteParams")
-		t.Logf("Expected 'comment_id: string;' but got something else in:\n%s", tsContentStr)
+	if !strings.Contains(tsContentStr, "commentId: string;") {
+		t.Error("Generated TypeScript does not use json tag for field name in RouteParams")
+		t.Logf("Expected 'commentId: string;' but got something else in:\n%s", tsContentStr)
 	}
 
-	// Check for param tag priority in MixedParamStruct
-	if !strings.Contains(tsContentStr, "user_id: number;") {
-		t.Error("Generated TypeScript does not prioritize param tag over json tag")
-		t.Logf("Expected 'user_id: number;' but got something else in:\n%s", tsContentStr)
+	// Check for json tag priority in MixedParamStruct
+	if !strings.Contains(tsContentStr, "id: number;") {
+		t.Error("Generated TypeScript does not prioritize json tag over param tag")
+		t.Logf("Expected 'id: number;' but got something else in:\n%s", tsContentStr)
 	}
 
-	if !strings.Contains(tsContentStr, "user_name: string;") {
-		t.Error("Generated TypeScript does not prioritize param tag over json tag")
-		t.Logf("Expected 'user_name: string;' but got something else in:\n%s", tsContentStr)
+	if !strings.Contains(tsContentStr, "name: string;") {
+		t.Error("Generated TypeScript does not prioritize json tag over param tag")
+		t.Logf("Expected 'name: string;' but got something else in:\n%s", tsContentStr)
 	}
 
 	// Check for json-only field

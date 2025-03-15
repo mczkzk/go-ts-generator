@@ -1,5 +1,5 @@
 // This file is auto-generated. Do not edit directly.
-// Generated at: 2025-03-15 14:52:24
+// Generated at: 2025-03-15 15:04:10
 // Note: This file includes both exported and unexported types and fields.
 
 /* eslint-disable */
@@ -56,9 +56,9 @@ export interface SearchParams {
  * LoginForm represents a login form submission
  */
 export interface LoginForm {
-  username: string;
-  password: string;
-  remember_me: boolean;
+  user: string;
+  pass: string;
+  remember: boolean;
 }
 
 /**
@@ -101,9 +101,9 @@ export interface RegisterForm {
  * MixedTagsStruct demonstrates priority between JSON and form tags
  */
 export interface MixedTagsStruct {
-  user_id: number;
-  user_name: string;
-  user_email: string;
+  id: number;
+  name: string;
+  email: string;
   json_only: string;
   form_only: string;
   NoTags: string;
@@ -124,9 +124,9 @@ export interface FileUploadForm {
  * RouteParams represents URL parameters in a route
  */
 export interface RouteParams {
-  user_id: number;
-  post_id: number;
-  comment_id: string;
+  id: number;
+  postId: number;
+  commentId: string;
   category_id: string;
 }
 
@@ -134,8 +134,8 @@ export interface RouteParams {
  * MixedParamStruct demonstrates priority between param and json tags
  */
 export interface MixedParamStruct {
-  user_id: number;
-  user_name: string;
+  id: number;
+  name: string;
   json_only: string;
   param_only: string;
 }
@@ -148,7 +148,7 @@ export interface SearchForm {
    * @validation
    *   - validate: omitempty,max=100
    */
-  q: string;
+  query: string;
   /**
    * @validation
    *   - validate: omitempty,dive,max=50
@@ -158,22 +158,22 @@ export interface SearchForm {
    * @validation
    *   - validate: omitempty,min=0
    */
-  min_price?: number;
+  minPrice?: number;
   /**
    * @validation
    *   - validate: omitempty,gtfield=MinPrice
    */
-  max_price?: number;
+  maxPrice?: number;
   /**
    * @validation
    *   - validate: omitempty,oneof=price
    */
-  sort_by: string;
+  sortBy: string;
   /**
    * @validation
    *   - validate: omitempty,oneof=asc
    */
-  sort_order: string;
+  sortOrder: string;
   /**
    * @validation
    *   - validate: min=1

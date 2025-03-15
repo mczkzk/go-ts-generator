@@ -13,6 +13,9 @@ A Go module that generates TypeScript type definitions from Go struct definition
 - Special handling for API-related types (preserves exact field names)
 - Handles pointer types as optional fields
 - Supports `omitempty` tag for optional fields
+- Prioritizes tags in the following order: `json` > `form` > `param` > `query`
+- Handles arrays of pointers as `(Type | null | undefined)[]` in TypeScript
+- Includes validation rules from struct tags as JSDoc comments
 
 ## Installation
 
@@ -69,6 +72,65 @@ Check out the [examples](./examples) directory for complete usage examples:
 - [Basic examples](./examples/basic) - Standard Go structs and their TypeScript equivalents
 - [API examples](./examples/api) - API-related types with preserved field names
 
+## Tag Priority
+
+The generator prioritizes field tags in the following order:
+
+1. `json` tag (highest priority) - Used for JSON field names in API communication
+2. `form` tag - Used for HTML form field names
+3. `param` tag - Used for URL parameter names
+4. `query` tag (lowest priority) - Used for query parameter names
+
+This means that if multiple tags are present on a field, the generator will use the name from the highest priority tag available.
+
+Example:
+```go
+type MixedTagsStruct struct {
+    ID    int64  `json:"id" form:"user_id"`
+    Name  string `form:"user_name" param:"name"`
+    Email string `param:"email" query:"user_email"`
+}
+```
+
+Will generate:
+```typescript
+export interface MixedTagsStruct {
+  id: number;         // from json tag
+  user_name: string;  // from form tag
+  email: string;      // from param tag
+}
+```
+
+## Validation Rules
+
+The generator extracts validation rules from struct tags and includes them as JSDoc comments in the generated TypeScript. This allows frontend developers to reference the same validation rules that are enforced on the backend.
+
+Example:
+```go
+type RegisterForm struct {
+    Username string `form:"username" binding:"required" validate:"min=3,max=50"`
+    Email    string `form:"email" binding:"required" validate:"email"`
+}
+```
+
+Will generate:
+```typescript
+export interface RegisterForm {
+  /**
+   * @validation
+   *   - binding: required
+   *   - validate: min=3,max=50
+   */
+  username: string;
+  /**
+   * @validation
+   *   - binding: required
+   *   - validate: email
+   */
+  email: string;
+}
+```
+
 ## Type Conversion
 
 | Go Type | TypeScript Type |
@@ -78,6 +140,7 @@ Check out the [examples](./examples) directory for complete usage examples:
 | int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64 | number |
 | time.Time | string /* RFC3339 */ |
 | []T | T[] |
+| []*T | (T \| null \| undefined)[] |
 | map[K]V | Record<K, V> |
 | interface{} | any |
 | *T | T? (optional) |
