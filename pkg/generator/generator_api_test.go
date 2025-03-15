@@ -238,9 +238,9 @@ type FileUploadForm struct {
 		t.Logf("Expected 'file?: FileHeader;' but got something else in:\n%s", tsContentStr)
 	}
 
-	if !strings.Contains(tsContentStr, "images?: FileHeader[];") {
+	if !strings.Contains(tsContentStr, "images?: (FileHeader | null | undefined)[];") {
 		t.Error("Generated TypeScript does not handle multiple file upload field correctly")
-		t.Logf("Expected 'images?: FileHeader[];' but got something else in:\n%s", tsContentStr)
+		t.Logf("Expected 'images?: (FileHeader | null | undefined)[];' but got something else in:\n%s", tsContentStr)
 	}
 }
 

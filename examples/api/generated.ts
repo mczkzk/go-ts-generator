@@ -1,5 +1,5 @@
 // This file is auto-generated. Do not edit directly.
-// Generated at: 2025-03-15 14:37:06
+// Generated at: 2025-03-15 14:52:24
 // Note: This file includes both exported and unexported types and fields.
 
 /* eslint-disable */
@@ -117,7 +117,7 @@ export interface FileUploadForm {
   title: string;
   description: string;
   file?: FileHeader;
-  images: FileHeader[];
+  images?: (FileHeader | null | undefined)[];
 }
 
 /**

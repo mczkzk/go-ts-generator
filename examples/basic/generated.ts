@@ -1,5 +1,5 @@
 // This file is auto-generated. Do not edit directly.
-// Generated at: 2025-03-15 12:37:21
+// Generated at: 2025-03-15 14:51:36
 // Note: This file includes both exported and unexported types and fields.
 
 /* eslint-disable */
@@ -35,7 +35,9 @@ export interface Product {
   name: string;
   description: string;
   price: number;
-  /** Pointer type without omitempty */
+  /**
+   * Pointer type without omitempty
+   */
   category?: Category;
   createdAt: string /* RFC3339 */;
 }
@@ -71,7 +73,7 @@ export interface UnexportedType {
 /**
  * UserList represents a list of users
  */
-export type UserList = (User | undefined)[];
+export type UserList = (User | null | undefined)[];
 
 /**
  * StringArray is a simple string array
