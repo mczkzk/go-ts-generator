@@ -30,6 +30,7 @@ type TypeScriptField struct {
 	Optional   bool
 	Comment    string
 	IsExported bool // Whether the field is exported
+	Validation []string
 }
 
 // GenerateTypes parses Go files in the source directory and generates TypeScript type definitions
@@ -116,9 +117,25 @@ func ParseGoFiles(sourceDir string) ([]TypeScriptType, error) {
 
 											// Parse tags
 											jsonName := fieldName
-											optional := isPointer // Pointer types are optional
+											optional := isPointer        // Pointer types are optional
+											var validationRules []string // Store validation rules for JSDoc
+
 											if field.Tag != nil {
 												tag := strings.Trim(field.Tag.Value, "`")
+
+												// Extract validation rules
+												bindingTag := extractTag(tag, "binding")
+												validateTag := extractTag(tag, "validate")
+
+												// Add binding validation rules if present
+												if bindingTag != "" {
+													validationRules = append(validationRules, "binding: "+bindingTag)
+												}
+
+												// Add validate validation rules if present
+												if validateTag != "" {
+													validationRules = append(validationRules, "validate: "+validateTag)
+												}
 
 												// Parse tags in order of priority: form, param, json, query
 												formTag := extractTag(tag, "form")
@@ -185,6 +202,7 @@ func ParseGoFiles(sourceDir string) ([]TypeScriptType, error) {
 												Optional:   optional,
 												Comment:    fieldComment,
 												IsExported: isFieldExported,
+												Validation: validationRules, // Add validation rules
 											})
 										}
 									}
@@ -396,9 +414,33 @@ func GenerateTypeScriptTypes(types []TypeScriptType, targetFile string) error {
 			fmt.Fprintf(file, "export interface %s {\n", typeName)
 			for _, field := range t.Fields {
 				// Write field comments
-				if field.Comment != "" {
-					lines := strings.Split(strings.TrimSpace(field.Comment), "\n")
-					fmt.Fprintf(file, "  /** %s */\n", strings.Join(lines, " "))
+				if field.Comment != "" || len(field.Validation) > 0 {
+					lines := []string{}
+
+					// Add field comment if present
+					if field.Comment != "" {
+						commentLines := strings.Split(strings.TrimSpace(field.Comment), "\n")
+						for _, line := range commentLines {
+							lines = append(lines, strings.TrimSpace(line))
+						}
+					}
+
+					// Add validation rules if present
+					if len(field.Validation) > 0 {
+						if len(lines) > 0 {
+							lines = append(lines, "") // Add empty line between comment and validation
+						}
+						lines = append(lines, "@validation")
+						for _, rule := range field.Validation {
+							lines = append(lines, "  - "+rule)
+						}
+					}
+
+					fmt.Fprintln(file, "  /**")
+					for _, line := range lines {
+						fmt.Fprintf(file, "   * %s\n", line)
+					}
+					fmt.Fprintln(file, "   */")
 				}
 
 				// Add a note for unexported fields

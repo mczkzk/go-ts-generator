@@ -1,5 +1,5 @@
 // This file is auto-generated. Do not edit directly.
-// Generated at: 2025-03-15 14:29:20
+// Generated at: 2025-03-15 14:37:06
 // Note: This file includes both exported and unexported types and fields.
 
 /* eslint-disable */
@@ -65,10 +65,35 @@ export interface LoginForm {
  * RegisterForm represents a user registration form
  */
 export interface RegisterForm {
+  /**
+   * @validation
+   *   - binding: required
+   *   - validate: min=3,max=50
+   */
   username: string;
+  /**
+   * @validation
+   *   - binding: required
+   *   - validate: email
+   */
   email: string;
+  /**
+   * @validation
+   *   - binding: required
+   *   - validate: min=8,containsAny=!@#$%^&*
+   */
   password: string;
+  /**
+   * @validation
+   *   - binding: required
+   *   - validate: eqfield=Password
+   */
   confirm_password: string;
+  /**
+   * @validation
+   *   - binding: required
+   *   - validate: eq=true
+   */
   accept_terms: boolean;
 }
 
@@ -113,5 +138,51 @@ export interface MixedParamStruct {
   user_name: string;
   json_only: string;
   param_only: string;
+}
+
+/**
+ * SearchForm represents a search form with various filters
+ */
+export interface SearchForm {
+  /**
+   * @validation
+   *   - validate: omitempty,max=100
+   */
+  q: string;
+  /**
+   * @validation
+   *   - validate: omitempty,dive,max=50
+   */
+  categories: string[];
+  /**
+   * @validation
+   *   - validate: omitempty,min=0
+   */
+  min_price?: number;
+  /**
+   * @validation
+   *   - validate: omitempty,gtfield=MinPrice
+   */
+  max_price?: number;
+  /**
+   * @validation
+   *   - validate: omitempty,oneof=price
+   */
+  sort_by: string;
+  /**
+   * @validation
+   *   - validate: omitempty,oneof=asc
+   */
+  sort_order: string;
+  /**
+   * @validation
+   *   - validate: min=1
+   */
+  page: number;
+  /**
+   * @validation
+   *   - validate: min=1,max=100
+   */
+  limit: number;
 }
 

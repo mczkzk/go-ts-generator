@@ -51,11 +51,11 @@ type LoginForm struct {
 
 // RegisterForm represents a user registration form
 type RegisterForm struct {
-	Username        string `form:"username" json:"username"`
-	Email           string `form:"email" json:"email"`
-	Password        string `form:"password" json:"password"`
-	ConfirmPassword string `form:"confirm_password" json:"confirm_password"`
-	AcceptTerms     bool   `form:"accept_terms" json:"accept_terms"`
+	Username        string `form:"username" json:"username" binding:"required" validate:"min=3,max=50"`
+	Email           string `form:"email" json:"email" binding:"required" validate:"email"`
+	Password        string `form:"password" json:"password" binding:"required" validate:"min=8,containsAny=!@#$%^&*"`
+	ConfirmPassword string `form:"confirm_password" json:"confirm_password" binding:"required" validate:"eqfield=Password"`
+	AcceptTerms     bool   `form:"accept_terms" json:"accept_terms" binding:"required" validate:"eq=true"`
 }
 
 // MixedTagsStruct demonstrates priority between JSON and form tags
@@ -91,4 +91,16 @@ type MixedParamStruct struct {
 	Name      string `json:"name" param:"user_name"`
 	JSONOnly  string `json:"json_only"`
 	ParamOnly string `param:"param_only"`
+}
+
+// SearchForm represents a search form with various filters
+type SearchForm struct {
+	Query      string   `form:"q" json:"query" validate:"omitempty,max=100"`
+	Categories []string `form:"categories" json:"categories" validate:"omitempty,dive,max=50"`
+	MinPrice   *float64 `form:"min_price" json:"minPrice" validate:"omitempty,min=0"`
+	MaxPrice   *float64 `form:"max_price" json:"maxPrice" validate:"omitempty,gtfield=MinPrice"`
+	SortBy     string   `form:"sort_by" json:"sortBy" validate:"omitempty,oneof=price date popularity rating"`
+	SortOrder  string   `form:"sort_order" json:"sortOrder" validate:"omitempty,oneof=asc desc"`
+	Page       int      `form:"page" json:"page" validate:"min=1"`
+	Limit      int      `form:"limit" json:"limit" validate:"min=1,max=100"`
 }
