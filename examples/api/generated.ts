@@ -1,5 +1,5 @@
 // This file is auto-generated. Do not edit directly.
-// Generated at: 2025-03-15 15:36:09
+// Generated at: 2025-03-15 16:40:22
 // Note: This file includes both exported and unexported types and fields.
 
 /* eslint-disable */
@@ -9,6 +9,10 @@ type FileHeader = any;
 
 /**
  * UserRequest represents a request to create or update a user
+ *
+ * @api Used in the following endpoints:
+ * - post /users (Request)
+ * - put /users/{id} (Request)
  */
 export interface UserRequest {
   name: string;
@@ -18,6 +22,15 @@ export interface UserRequest {
 
 /**
  * UserResponse represents an API response with user data
+ *
+ * @api Used in the following endpoints:
+ * - put /users/{id} (Response)
+ * - get /users/search (Response)
+ * - post /auth/login (Response)
+ * - post /auth/register (Response)
+ * - get /users (Response)
+ * - get /users/{id} (Response)
+ * - post /users (Response)
  */
 export interface UserResponse {
   user_id: number;
@@ -54,6 +67,9 @@ export interface SearchParams {
 
 /**
  * LoginForm represents a login form submission
+ *
+ * @api Used in the following endpoints:
+ * - post /auth/login (Request)
  */
 export interface LoginForm {
   user: string;
@@ -63,6 +79,9 @@ export interface LoginForm {
 
 /**
  * RegisterForm represents a user registration form
+ *
+ * @api Used in the following endpoints:
+ * - post /auth/register (Request)
  */
 export interface RegisterForm {
   /**

@@ -15,6 +15,7 @@ A Go module that generates TypeScript type definitions from Go struct definition
 - Supports `omitempty` tag for optional fields
 - Handles arrays of pointers as `(Type | null | undefined)[]` in TypeScript
 - Includes validation rules from struct tags as JSDoc comments
+- Parses Swagger/OpenAPI annotations to add API endpoint information to type comments
 
 ## Installation
 

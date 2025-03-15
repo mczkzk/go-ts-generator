@@ -8,6 +8,7 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 	"unicode"
@@ -19,8 +20,17 @@ type TypeScriptType struct {
 	Fields      []TypeScriptField
 	IsInterface bool
 	Comment     string
-	IsExported  bool // Whether the type is exported
-	IsAPIType   bool // Whether the type is API-related
+	IsExported  bool           // Whether the type is exported
+	IsAPIType   bool           // Whether the type is API-related
+	Endpoints   []EndpointInfo // Information about API endpoints using this type
+}
+
+// EndpointInfo represents information about an API endpoint
+type EndpointInfo struct {
+	Method   string // HTTP method (GET, POST, etc.)
+	Path     string // API path
+	Response bool   // Whether the type is used as a response
+	Request  bool   // Whether the type is used as a request
 }
 
 // TypeScriptField represents a field in a TypeScript type
@@ -54,6 +64,14 @@ func GenerateTypes(sourceDir, targetFile string) error {
 func ParseGoFiles(sourceDir string) ([]TypeScriptType, error) {
 	var types []TypeScriptType
 
+	// Map to store type names and their corresponding TypeScriptType objects
+	typeMap := make(map[string]*TypeScriptType)
+
+	// Regular expressions for parsing Swagger/OpenAPI annotations
+	routerRegex := regexp.MustCompile(`@Router\s+([^\s]+)\s+\[([^\]]+)\]`)
+	successRegex := regexp.MustCompile(`@Success\s+\d+\s+\{([^}]+)\}\s+(\S+)`)
+	paramRegex := regexp.MustCompile(`@Param\s+\S+\s+body\s+(\S+)`)
+
 	// Search for Go files in the source directory
 	err := filepath.Walk(sourceDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -72,6 +90,57 @@ func ParseGoFiles(sourceDir string) ([]TypeScriptType, error) {
 
 			// Determine if the file is API-related based on the file path
 			isAPIFile := strings.Contains(path, "controller") || strings.Contains(path, "handler") || strings.Contains(path, "api")
+
+			// Process all comments in the file to find Swagger/OpenAPI annotations
+			for _, commentGroup := range node.Comments {
+				comment := commentGroup.Text()
+
+				// Extract endpoint information from Swagger/OpenAPI annotations
+				routerMatches := routerRegex.FindStringSubmatch(comment)
+				if len(routerMatches) >= 3 {
+					path := routerMatches[1]
+					method := routerMatches[2]
+
+					// Extract response type information
+					successMatches := successRegex.FindAllStringSubmatch(comment, -1)
+					for _, match := range successMatches {
+						if len(match) >= 3 {
+							responseType := match[2]
+							// Remove array prefix if present
+							if strings.HasPrefix(responseType, "[]") {
+								responseType = strings.TrimPrefix(responseType, "[]")
+							}
+
+							// Store endpoint information for this type
+							if typeObj, exists := typeMap[responseType]; exists {
+								typeObj.Endpoints = append(typeObj.Endpoints, EndpointInfo{
+									Method:   method,
+									Path:     path,
+									Response: true,
+									Request:  false,
+								})
+							}
+						}
+					}
+
+					// Extract request body type information
+					paramMatches := paramRegex.FindAllStringSubmatch(comment, -1)
+					for _, match := range paramMatches {
+						if len(match) >= 2 {
+							requestType := match[1]
+							// Store endpoint information for this type
+							if typeObj, exists := typeMap[requestType]; exists {
+								typeObj.Endpoints = append(typeObj.Endpoints, EndpointInfo{
+									Method:   method,
+									Path:     path,
+									Response: false,
+									Request:  true,
+								})
+							}
+						}
+					}
+				}
+			}
 
 			// Collect type definitions
 			for _, decl := range node.Decls {
@@ -95,12 +164,57 @@ func ParseGoFiles(sourceDir string) ([]TypeScriptType, error) {
 										strings.Contains(typeSpec.Name.Name, "Form") ||
 										strings.Contains(path, "form") ||
 										strings.Contains(path, "api"),
+									Endpoints: []EndpointInfo{},
 								}
 
 								// Get comments
 								if genDecl.Doc != nil {
 									tsType.Comment = genDecl.Doc.Text()
+
+									// Extract endpoint information from type comments
+									routerMatches := routerRegex.FindStringSubmatch(tsType.Comment)
+									if len(routerMatches) >= 3 {
+										path := routerMatches[1]
+										method := routerMatches[2]
+
+										// Extract response type information
+										successMatches := successRegex.FindAllStringSubmatch(tsType.Comment, -1)
+										for _, match := range successMatches {
+											if len(match) >= 3 {
+												responseType := match[2]
+												// Check if this type is mentioned in the response
+												if responseType == tsType.Name || responseType == "[]"+tsType.Name {
+													tsType.Endpoints = append(tsType.Endpoints, EndpointInfo{
+														Method:   method,
+														Path:     path,
+														Response: true,
+														Request:  false,
+													})
+												}
+											}
+										}
+
+										// Extract request body type information
+										paramMatches := paramRegex.FindAllStringSubmatch(tsType.Comment, -1)
+										for _, match := range paramMatches {
+											if len(match) >= 2 {
+												requestType := match[1]
+												// Check if this type is mentioned in the request
+												if requestType == tsType.Name {
+													tsType.Endpoints = append(tsType.Endpoints, EndpointInfo{
+														Method:   method,
+														Path:     path,
+														Response: false,
+														Request:  true,
+													})
+												}
+											}
+										}
+									}
 								}
+
+								// Store the type in the map for later reference
+								typeMap[tsType.Name] = &tsType
 
 								// Collect fields
 								if structType.Fields != nil {
@@ -211,6 +325,7 @@ func ParseGoFiles(sourceDir string) ([]TypeScriptType, error) {
 									}
 								}
 
+								// Add type to the list
 								types = append(types, tsType)
 							} else {
 								// For non-struct types (type aliases, etc.)
@@ -238,6 +353,7 @@ func ParseGoFiles(sourceDir string) ([]TypeScriptType, error) {
 									IsExported: true,
 								})
 
+								// Add type to the list
 								types = append(types, tsType)
 							}
 						}
@@ -252,7 +368,18 @@ func ParseGoFiles(sourceDir string) ([]TypeScriptType, error) {
 		return nil, fmt.Errorf("error walking directory: %v", err)
 	}
 
-	return types, nil
+	// Convert the map values to a slice for the final result
+	result := make([]TypeScriptType, 0, len(types))
+	for _, t := range types {
+		// Add any additional endpoints from the map
+		if mapType, exists := typeMap[t.Name]; exists && len(mapType.Endpoints) > 0 {
+			// Merge endpoints from the map with the ones already in the type
+			t.Endpoints = append(t.Endpoints, mapType.Endpoints...)
+		}
+		result = append(result, t)
+	}
+
+	return result, nil
 }
 
 // getTypeString gets a TypeScript type string from a Go type expression
@@ -386,14 +513,59 @@ func GenerateTypeScriptTypes(types []TypeScriptType, targetFile string) error {
 	// Write type definitions
 	for _, t := range types {
 		// Write comments
+		fmt.Fprintln(file, "/**")
+
+		// Add original comment if present
 		if t.Comment != "" {
 			lines := strings.Split(strings.TrimSpace(t.Comment), "\n")
-			fmt.Fprintln(file, "/**")
 			for _, line := range lines {
 				fmt.Fprintf(file, " * %s\n", strings.TrimSpace(line))
 			}
-			fmt.Fprintln(file, " */")
 		}
+
+		// Add endpoint information if present
+		if len(t.Endpoints) > 0 {
+			// Add a separator if there was a comment
+			if t.Comment != "" {
+				fmt.Fprintln(file, " *")
+			}
+
+			// Group endpoints by path and method
+			endpointMap := make(map[string][]EndpointInfo)
+			for _, endpoint := range t.Endpoints {
+				key := fmt.Sprintf("%s %s", endpoint.Method, endpoint.Path)
+				endpointMap[key] = append(endpointMap[key], endpoint)
+			}
+
+			// Add endpoint information
+			fmt.Fprintln(file, " * @api Used in the following endpoints:")
+			for key, endpoints := range endpointMap {
+				usages := []string{}
+				for _, endpoint := range endpoints {
+					if endpoint.Response {
+						usages = append(usages, "Response")
+					}
+					if endpoint.Request {
+						usages = append(usages, "Request")
+					}
+				}
+
+				// Remove duplicates from usages
+				uniqueUsages := []string{}
+				usageMap := make(map[string]bool)
+				for _, usage := range usages {
+					if !usageMap[usage] {
+						usageMap[usage] = true
+						uniqueUsages = append(uniqueUsages, usage)
+					}
+				}
+
+				usageStr := strings.Join(uniqueUsages, ", ")
+				fmt.Fprintf(file, " * - %s (%s)\n", key, usageStr)
+			}
+		}
+
+		fmt.Fprintln(file, " */")
 
 		// Add a note for unexported types
 		if !t.IsExported {
