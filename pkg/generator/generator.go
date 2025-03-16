@@ -353,9 +353,11 @@ func CollectTypeDefinitions(sourceDir string) ([]TypeScriptType, error) {
 // CollectEndpointInfo collects endpoint information from Go files in the source directory
 func CollectEndpointInfo(sourceDir string, typeMap map[string]*TypeScriptType) error {
 	// Regular expressions for parsing Swagger/OpenAPI annotations
-	routerRegex := regexp.MustCompile(`@Router\s+([^\s]+)\s+\[([^\]]+)\]`)
+	routerRegex := regexp.MustCompile(`@Router\s+([^\s\[]+)\s+\[([^\]]+)\]`)
+	// Handle different formats of @Success annotation
 	successRegex := regexp.MustCompile(`@Success\s+\d+\s+\{([^}]+)\}\s+(\S+)`)
-	paramRegex := regexp.MustCompile(`@Param\s+\S+\s+body\s+(\S+)`)
+	successRegexAlt := regexp.MustCompile(`@Success\s+\d+\s+(\S+)`) // Alternative format without braces
+	paramRegex := regexp.MustCompile(`@Param\s+\S+\s+(body|path|query)\s+(\S+)`)
 
 	// Walk through the source directory
 	err := filepath.Walk(sourceDir, func(path string, info os.FileInfo, err error) error {
@@ -373,17 +375,122 @@ func CollectEndpointInfo(sourceDir string, typeMap map[string]*TypeScriptType) e
 				return nil
 			}
 
-			// Process all comments in the file to find Swagger/OpenAPI annotations
+			// Process function declarations to find their associated comments
+			for _, decl := range node.Decls {
+				if funcDecl, ok := decl.(*ast.FuncDecl); ok {
+					// Skip methods without doc comments
+					if funcDecl.Doc == nil {
+						continue
+					}
+
+					comment := funcDecl.Doc.Text()
+
+					// Extract endpoint information from Swagger/OpenAPI annotations
+					routerMatches := routerRegex.FindStringSubmatch(comment)
+					if len(routerMatches) >= 3 {
+						routePath := routerMatches[1]
+						method := routerMatches[2]
+
+						// Normalize path parameters (convert :param to {param})
+						normalizedPath := normalizePath(routePath)
+
+						// Extract response type information - try standard format first
+						successMatches := successRegex.FindAllStringSubmatch(comment, -1)
+						for _, match := range successMatches {
+							if len(match) >= 3 {
+								responseType := match[2]
+								// Remove array prefix if present
+								if strings.HasPrefix(responseType, "[]") {
+									responseType = strings.TrimPrefix(responseType, "[]")
+								}
+
+								// Extract the type name without package prefix if present
+								typeParts := strings.Split(responseType, ".")
+								typeNameOnly := typeParts[len(typeParts)-1]
+
+								// Store endpoint information for this type
+								if typeObj, exists := typeMap[typeNameOnly]; exists {
+									typeObj.Endpoints = append(typeObj.Endpoints, EndpointInfo{
+										Method:   method,
+										Path:     normalizedPath,
+										Response: true,
+										Request:  false,
+									})
+								}
+							}
+						}
+
+						// Try alternative format if no matches found
+						if len(successMatches) == 0 {
+							altMatches := successRegexAlt.FindAllStringSubmatch(comment, -1)
+							for _, match := range altMatches {
+								if len(match) >= 2 {
+									responseType := match[1]
+									// Remove array prefix if present
+									if strings.HasPrefix(responseType, "[]") {
+										responseType = strings.TrimPrefix(responseType, "[]")
+									}
+
+									// Extract the type name without package prefix if present
+									typeParts := strings.Split(responseType, ".")
+									typeNameOnly := typeParts[len(typeParts)-1]
+
+									// Store endpoint information for this type
+									if typeObj, exists := typeMap[typeNameOnly]; exists {
+										typeObj.Endpoints = append(typeObj.Endpoints, EndpointInfo{
+											Method:   method,
+											Path:     normalizedPath,
+											Response: true,
+											Request:  false,
+										})
+									}
+								}
+							}
+						}
+
+						// Extract request body type information
+						paramMatches := paramRegex.FindAllStringSubmatch(comment, -1)
+						for _, match := range paramMatches {
+							if len(match) >= 3 {
+								paramType := match[1]
+								requestType := match[2]
+
+								// Extract the type name without package prefix if present
+								typeParts := strings.Split(requestType, ".")
+								typeNameOnly := typeParts[len(typeParts)-1]
+
+								// Only consider body parameters as request types
+								if paramType == "body" {
+									// Store endpoint information for this type
+									if typeObj, exists := typeMap[typeNameOnly]; exists {
+										typeObj.Endpoints = append(typeObj.Endpoints, EndpointInfo{
+											Method:   method,
+											Path:     normalizedPath,
+											Response: false,
+											Request:  true,
+										})
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
+			// Also process all comments in the file to catch any that might not be directly attached to functions
 			for _, commentGroup := range node.Comments {
 				comment := commentGroup.Text()
 
 				// Extract endpoint information from Swagger/OpenAPI annotations
 				routerMatches := routerRegex.FindStringSubmatch(comment)
 				if len(routerMatches) >= 3 {
-					path := routerMatches[1]
+					routePath := routerMatches[1]
 					method := routerMatches[2]
 
-					// Extract response type information
+					// Normalize path parameters (convert :param to {param})
+					normalizedPath := normalizePath(routePath)
+
+					// Extract response type information - try standard format first
 					successMatches := successRegex.FindAllStringSubmatch(comment, -1)
 					for _, match := range successMatches {
 						if len(match) >= 3 {
@@ -393,11 +500,15 @@ func CollectEndpointInfo(sourceDir string, typeMap map[string]*TypeScriptType) e
 								responseType = strings.TrimPrefix(responseType, "[]")
 							}
 
+							// Extract the type name without package prefix if present
+							typeParts := strings.Split(responseType, ".")
+							typeNameOnly := typeParts[len(typeParts)-1]
+
 							// Store endpoint information for this type
-							if typeObj, exists := typeMap[responseType]; exists {
+							if typeObj, exists := typeMap[typeNameOnly]; exists {
 								typeObj.Endpoints = append(typeObj.Endpoints, EndpointInfo{
 									Method:   method,
-									Path:     path,
+									Path:     normalizedPath,
 									Response: true,
 									Request:  false,
 								})
@@ -405,20 +516,56 @@ func CollectEndpointInfo(sourceDir string, typeMap map[string]*TypeScriptType) e
 						}
 					}
 
+					// Try alternative format if no matches found
+					if len(successMatches) == 0 {
+						altMatches := successRegexAlt.FindAllStringSubmatch(comment, -1)
+						for _, match := range altMatches {
+							if len(match) >= 2 {
+								responseType := match[1]
+								// Remove array prefix if present
+								if strings.HasPrefix(responseType, "[]") {
+									responseType = strings.TrimPrefix(responseType, "[]")
+								}
+
+								// Extract the type name without package prefix if present
+								typeParts := strings.Split(responseType, ".")
+								typeNameOnly := typeParts[len(typeParts)-1]
+
+								// Store endpoint information for this type
+								if typeObj, exists := typeMap[typeNameOnly]; exists {
+									typeObj.Endpoints = append(typeObj.Endpoints, EndpointInfo{
+										Method:   method,
+										Path:     normalizedPath,
+										Response: true,
+										Request:  false,
+									})
+								}
+							}
+						}
+					}
+
 					// Extract request body type information
 					paramMatches := paramRegex.FindAllStringSubmatch(comment, -1)
 					for _, match := range paramMatches {
-						if len(match) >= 2 {
-							requestType := match[1]
+						if len(match) >= 3 {
+							paramType := match[1]
+							requestType := match[2]
 
-							// Store endpoint information for this type
-							if typeObj, exists := typeMap[requestType]; exists {
-								typeObj.Endpoints = append(typeObj.Endpoints, EndpointInfo{
-									Method:   method,
-									Path:     path,
-									Response: false,
-									Request:  true,
-								})
+							// Extract the type name without package prefix if present
+							typeParts := strings.Split(requestType, ".")
+							typeNameOnly := typeParts[len(typeParts)-1]
+
+							// Only consider body parameters as request types
+							if paramType == "body" {
+								// Store endpoint information for this type
+								if typeObj, exists := typeMap[typeNameOnly]; exists {
+									typeObj.Endpoints = append(typeObj.Endpoints, EndpointInfo{
+										Method:   method,
+										Path:     normalizedPath,
+										Response: false,
+										Request:  true,
+									})
+								}
 							}
 						}
 					}
@@ -433,6 +580,14 @@ func CollectEndpointInfo(sourceDir string, typeMap map[string]*TypeScriptType) e
 	}
 
 	return nil
+}
+
+// normalizePath converts different path parameter formats to a consistent format
+// e.g., /api/rooms/:room_id/genres -> /api/rooms/{room_id}/genres
+func normalizePath(path string) string {
+	// Convert :param format to {param} format
+	colonParamRegex := regexp.MustCompile(`:([^/]+)`)
+	return colonParamRegex.ReplaceAllString(path, "{$1}")
 }
 
 // getTypeString gets a TypeScript type string from a Go type expression
