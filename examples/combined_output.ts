@@ -1,5 +1,5 @@
 // This file is auto-generated. Do not edit directly.
-// Generated at: 2025-03-16 13:14:25
+// Generated at: 2025-03-16 13:39:00
 // Note: This file includes both exported and unexported types and fields.
 
 /* eslint-disable */
@@ -8,15 +8,41 @@
 type FileHeader = any;
 
 /**
- * Address represents a physical address in API requests/responses
+ * MixedTagsStruct demonstrates priority between JSON and form tags
+ */
+export interface MixedTagsStruct {
+  id: number;
+  name: string;
+  email: string;
+  json_only: string;
+  form_only: string;
+  NoTags: string;
+}
+
+/**
+ * Address represents a physical address
  */
 export interface Address {
-  street_line1: string;
-  street_line2?: string;
+  street: string;
   city: string;
   state: string;
-  postal_code: string;
+  zipCode: string;
   country: string;
+}
+
+/**
+ * Product represents a product in the catalog
+ */
+export interface Product {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  /**
+   * Pointer type without omitempty
+   */
+  category?: Category;
+  createdAt: string /* RFC3339 */;
 }
 
 /**
@@ -31,6 +57,23 @@ export interface FileUploadForm {
 }
 
 /**
+ * User represents a user in the system
+ */
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  createdAt: string /* RFC3339 */;
+  updatedAt: string /* RFC3339 */;
+  address?: Address;
+}
+
+/**
+ * UserList represents a list of users
+ */
+export type UserList = User[];
+
+/**
  * RouteParams represents URL parameters in a route
  */
 export interface RouteParams {
@@ -41,68 +84,22 @@ export interface RouteParams {
 }
 
 /**
- * UserRequest represents a request to create or update a user
- *
- * @api Used in the following endpoints:
- * - post /users (Request)
- * - put /users/{id} (Request)
+ * MixedParamStruct demonstrates priority between param and json tags
  */
-export interface UserRequest {
+export interface MixedParamStruct {
+  id: number;
   name: string;
-  email: string;
-  address: Address;
+  json_only: string;
+  param_only: string;
 }
 
 /**
- * UserResponse represents an API response with user data
- *
- * @api Used in the following endpoints:
- * - post /users (Response)
- * - put /users/{id} (Response)
- * - get /users/search (Response)
- * - post /auth/login (Response)
- * - post /auth/register (Response)
- * - get /users (Response)
- * - get /users/{id} (Response)
+ * CategoryMap is a map of category IDs to categories
  */
-export interface UserResponse {
-  user_id: number;
-  first_name: string;
-  last_name: string;
-  email: string;
-  created_at: string /* RFC3339 */;
-  updated_at: string /* RFC3339 */;
-}
-
-/**
- * SearchParams represents query parameters for search endpoints
- */
-export interface SearchParams {
-  q: string;
-  page: number;
-  limit: number;
-  sort_by: string;
-  sort_order: string;
-  filters: string[];
-}
-
-/**
- * LoginForm represents a login form submission
- *
- * @api Used in the following endpoints:
- * - post /auth/login (Request)
- */
-export interface LoginForm {
-  user: string;
-  pass: string;
-  remember: boolean;
-}
+export type CategoryMap = Record<number, Category>;
 
 /**
  * RegisterForm represents a user registration form
- *
- * @api Used in the following endpoints:
- * - post /auth/register (Request)
  */
 export interface RegisterForm {
   /**
@@ -138,25 +135,50 @@ export interface RegisterForm {
 }
 
 /**
- * MixedTagsStruct demonstrates priority between JSON and form tags
+ * StringArray is a simple string array
  */
-export interface MixedTagsStruct {
-  id: number;
+export type StringArray = string[];
+
+/**
+ * UserRequest represents a request to create or update a user
+ */
+export interface UserRequest {
   name: string;
   email: string;
-  json_only: string;
-  form_only: string;
-  NoTags: string;
+  address: Address;
 }
 
 /**
- * MixedParamStruct demonstrates priority between param and json tags
+ * UserResponse represents an API response with user data
  */
-export interface MixedParamStruct {
-  id: number;
-  name: string;
-  json_only: string;
-  param_only: string;
+export interface UserResponse {
+  user_id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  created_at: string /* RFC3339 */;
+  updated_at: string /* RFC3339 */;
+}
+
+/**
+ * SearchParams represents query parameters for search endpoints
+ */
+export interface SearchParams {
+  q: string;
+  page: number;
+  limit: number;
+  sort_by: string;
+  sort_order: string;
+  filters: string[];
+}
+
+/**
+ * LoginForm represents a login form submission
+ */
+export interface LoginForm {
+  user: string;
+  pass: string;
+  remember: boolean;
 }
 
 /**
@@ -203,5 +225,33 @@ export interface SearchForm {
    *   - validate: min=1,max=100
    */
   limit: number;
+}
+
+/**
+ * Category represents a product category
+ */
+export interface Category {
+  id: number;
+  name: string;
+}
+
+/**
+ * unexportedType is not exported
+ */
+/**
+ * Note: This is an unexported type. In Go code, it's defined with a lowercase identifier.
+ * It cannot be accessed directly from outside the package.
+ */
+export interface unexportedType {
+  /**
+   * Note: This is an unexported field. In Go code, it's defined with a lowercase identifier.
+   * It cannot be accessed directly from outside the package.
+   */
+  field1: string;
+  /**
+   * Note: This is an unexported field. In Go code, it's defined with a lowercase identifier.
+   * It cannot be accessed directly from outside the package.
+   */
+  field2: number;
 }
 
