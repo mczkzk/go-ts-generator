@@ -1,11 +1,106 @@
 // This file is auto-generated. Do not edit directly.
-// Generated at: 2025-03-16 13:39:00
+// Generated at: 2025-03-16 19:34:17
 // Note: This file includes both exported and unexported types and fields.
 
 /* eslint-disable */
 
 // Placeholders for undefined types
 type FileHeader = any;
+
+/**
+ * SearchParams represents query parameters for search endpoints
+ */
+export interface SearchParams {
+  q: string;
+  page: number;
+  limit: number;
+  sort_by: string;
+  sort_order: string;
+  filters: string[];
+}
+
+/**
+ * LoginForm represents a login form submission
+ *
+ * @api Used in the following endpoints:
+ * - post /auth/login (Request)
+ */
+export interface LoginForm {
+  user: string;
+  pass: string;
+  remember: boolean;
+}
+
+/**
+ * SearchForm represents a search form with various filters
+ */
+export interface SearchForm {
+  /**
+   * @validation
+   *   - validate: omitempty,max=100
+   */
+  query: string;
+  /**
+   * @validation
+   *   - validate: omitempty,dive,max=50
+   */
+  categories: string[];
+  /**
+   * @validation
+   *   - validate: omitempty,min=0
+   */
+  minPrice?: number | null;
+  /**
+   * @validation
+   *   - validate: omitempty,gtfield=MinPrice
+   */
+  maxPrice?: number | null;
+  /**
+   * @validation
+   *   - validate: omitempty,oneof=price
+   */
+  sortBy: string;
+  /**
+   * @validation
+   *   - validate: omitempty,oneof=asc
+   */
+  sortOrder: string;
+  /**
+   * @validation
+   *   - validate: min=1
+   */
+  page: number;
+  /**
+   * @validation
+   *   - validate: min=1,max=100
+   */
+  limit: number;
+}
+
+/**
+ * UserRequest represents a request to create or update a user
+ *
+ * @api Used in the following endpoints:
+ * - post /users (Request)
+ * - put /users/{id} (Request)
+ */
+export interface UserRequest {
+  name: string;
+  email: string;
+  address: Address;
+}
+
+/**
+ * Address represents a physical address in API requests/responses
+ */
+export interface Address {
+  street_line1: string;
+  street_line2?: string;
+  city: string;
+  state: string;
+  postal_code: string;
+  country: string;
+}
 
 /**
  * MixedTagsStruct demonstrates priority between JSON and form tags
@@ -20,58 +115,15 @@ export interface MixedTagsStruct {
 }
 
 /**
- * Address represents a physical address
- */
-export interface Address {
-  street: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  country: string;
-}
-
-/**
- * Product represents a product in the catalog
- */
-export interface Product {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  /**
-   * Pointer type without omitempty
-   */
-  category?: Category;
-  createdAt: string /* RFC3339 */;
-}
-
-/**
  * FileUploadForm represents a form with file uploads
  */
 export interface FileUploadForm {
   user_id: number;
   title: string;
   description: string;
-  file?: FileHeader;
+  file?: FileHeader | null;
   images?: FileHeader[];
 }
-
-/**
- * User represents a user in the system
- */
-export interface User {
-  id: number;
-  name: string;
-  email: string;
-  createdAt: string /* RFC3339 */;
-  updatedAt: string /* RFC3339 */;
-  address?: Address;
-}
-
-/**
- * UserList represents a list of users
- */
-export type UserList = User[];
 
 /**
  * RouteParams represents URL parameters in a route
@@ -94,12 +146,55 @@ export interface MixedParamStruct {
 }
 
 /**
- * CategoryMap is a map of category IDs to categories
+ * NullableFieldsExample demonstrates different combinations of nullable and required fields
  */
-export type CategoryMap = Record<number, Category>;
+export interface NullableFieldsExample {
+  /**
+   * @validation
+   *   - validate: required
+   */
+  required_field: string;
+  optional_field?: string;
+  nullable_field?: string | null;
+  nullable_optional_field?: string | null;
+  /**
+   * @validation
+   *   - validate: required
+   */
+  nullable_required_field: string | null;
+  /**
+   * @validation
+   *   - binding: required
+   */
+  binding_required_field: string;
+}
+
+/**
+ * UserResponse represents an API response with user data
+ *
+ * @api Used in the following endpoints:
+ * - post /auth/login (Response)
+ * - post /auth/register (Response)
+ * - get /users (Response)
+ * - get /users/{id} (Response)
+ * - post /users (Response)
+ * - put /users/{id} (Response)
+ * - get /users/search (Response)
+ */
+export interface UserResponse {
+  user_id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  created_at: string /* RFC3339 */;
+  updated_at: string /* RFC3339 */;
+}
 
 /**
  * RegisterForm represents a user registration form
+ *
+ * @api Used in the following endpoints:
+ * - post /auth/register (Request)
  */
 export interface RegisterForm {
   /**
@@ -132,126 +227,5 @@ export interface RegisterForm {
    *   - validate: eq=true
    */
   accept_terms: boolean;
-}
-
-/**
- * StringArray is a simple string array
- */
-export type StringArray = string[];
-
-/**
- * UserRequest represents a request to create or update a user
- */
-export interface UserRequest {
-  name: string;
-  email: string;
-  address: Address;
-}
-
-/**
- * UserResponse represents an API response with user data
- */
-export interface UserResponse {
-  user_id: number;
-  first_name: string;
-  last_name: string;
-  email: string;
-  created_at: string /* RFC3339 */;
-  updated_at: string /* RFC3339 */;
-}
-
-/**
- * SearchParams represents query parameters for search endpoints
- */
-export interface SearchParams {
-  q: string;
-  page: number;
-  limit: number;
-  sort_by: string;
-  sort_order: string;
-  filters: string[];
-}
-
-/**
- * LoginForm represents a login form submission
- */
-export interface LoginForm {
-  user: string;
-  pass: string;
-  remember: boolean;
-}
-
-/**
- * SearchForm represents a search form with various filters
- */
-export interface SearchForm {
-  /**
-   * @validation
-   *   - validate: omitempty,max=100
-   */
-  query: string;
-  /**
-   * @validation
-   *   - validate: omitempty,dive,max=50
-   */
-  categories: string[];
-  /**
-   * @validation
-   *   - validate: omitempty,min=0
-   */
-  minPrice?: number;
-  /**
-   * @validation
-   *   - validate: omitempty,gtfield=MinPrice
-   */
-  maxPrice?: number;
-  /**
-   * @validation
-   *   - validate: omitempty,oneof=price
-   */
-  sortBy: string;
-  /**
-   * @validation
-   *   - validate: omitempty,oneof=asc
-   */
-  sortOrder: string;
-  /**
-   * @validation
-   *   - validate: min=1
-   */
-  page: number;
-  /**
-   * @validation
-   *   - validate: min=1,max=100
-   */
-  limit: number;
-}
-
-/**
- * Category represents a product category
- */
-export interface Category {
-  id: number;
-  name: string;
-}
-
-/**
- * unexportedType is not exported
- */
-/**
- * Note: This is an unexported type. In Go code, it's defined with a lowercase identifier.
- * It cannot be accessed directly from outside the package.
- */
-export interface unexportedType {
-  /**
-   * Note: This is an unexported field. In Go code, it's defined with a lowercase identifier.
-   * It cannot be accessed directly from outside the package.
-   */
-  field1: string;
-  /**
-   * Note: This is an unexported field. In Go code, it's defined with a lowercase identifier.
-   * It cannot be accessed directly from outside the package.
-   */
-  field2: number;
 }
 

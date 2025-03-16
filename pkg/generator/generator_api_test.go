@@ -233,9 +233,9 @@ type FileUploadForm struct {
 	}
 
 	// Check for FileUploadForm fields
-	if !strings.Contains(tsContentStr, "file?: FileHeader;") {
+	if !strings.Contains(tsContentStr, "file?: FileHeader | null;") {
 		t.Error("Generated TypeScript does not handle file upload field correctly")
-		t.Logf("Expected 'file?: FileHeader;' but got something else in:\n%s", tsContentStr)
+		t.Logf("Expected 'file?: FileHeader | null;' but got something else in:\n%s", tsContentStr)
 	}
 
 	if !strings.Contains(tsContentStr, "images?: FileHeader[];") {

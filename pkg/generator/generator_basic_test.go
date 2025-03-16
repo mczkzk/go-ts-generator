@@ -110,8 +110,9 @@ type CategoryMap map[int]*Category
 	}
 
 	// Check for pointer field handling
-	if !strings.Contains(tsContentStr, "address?: Address;") {
-		t.Error("Generated TypeScript does not handle pointer fields as optional")
+	if !strings.Contains(tsContentStr, "address?: Address | null;") {
+		t.Error("Generated TypeScript does not handle pointer fields as optional and nullable")
+		t.Logf("Expected 'address?: Address | null;' but got something else in:\n%s", tsContentStr)
 	}
 
 	// Check for time.Time conversion and original field names from JSON tags
@@ -133,8 +134,8 @@ type CategoryMap map[int]*Category
 	}
 
 	// Check for map type alias
-	if !strings.Contains(tsContentStr, "export type CategoryMap = Record<number, Category>;") {
+	if !strings.Contains(tsContentStr, "export type CategoryMap = Record<number, Category | null>;") {
 		t.Error("Generated TypeScript does not handle map type alias correctly")
-		t.Logf("Expected 'export type CategoryMap = Record<number, Category>;' but got something else in:\n%s", tsContentStr)
+		t.Logf("Expected 'export type CategoryMap = Record<number, Category | null>;' but got something else in:\n%s", tsContentStr)
 	}
 }

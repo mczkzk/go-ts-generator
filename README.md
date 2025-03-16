@@ -5,15 +5,10 @@ A Go module that generates TypeScript type definitions from Go struct definition
 ## Features
 
 - Automatically generates TypeScript interfaces from Go structs
-- Handles JSON, form, param, and query tag parsing for field names (prioritized in that order)
-- Converts Go types to appropriate TypeScript types
-- Preserves comments from Go code in the generated TypeScript
-- Handles both exported and unexported types and fields
-- Preserves original field names from struct tags
-- Handles pointer types as optional fields
-- Supports `omitempty` tag for optional fields
-- Includes validation rules from struct tags as JSDoc comments
-- Parses Swagger/OpenAPI annotations to add API endpoint information to type comments
+- Handles JSON, form, param, and query tag parsing for field names
+- Preserves comments and original field names from Go code
+- Properly handles nullable types, optional fields, and validation rules
+- Parses Swagger/OpenAPI annotations for API endpoint information
 - Supports processing multiple source directories in a single command
 
 ## Installation
@@ -93,10 +88,20 @@ Check out the [examples](./examples) directory for complete usage examples:
 | int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64 | number |
 | time.Time | string /* RFC3339 */ |
 | []T | T[] |
-| []*T | T[] |
 | map[K]V | Record<K, V> |
 | interface{} | any |
-| *T | T? (optional) |
+
+## Field Optionality Rules
+
+| Go Field | TypeScript Field |
+|---------|----------------|
+| Regular field | Required field |
+| Field with `omitempty` tag | Optional field (`?`) |
+| Pointer field (`*T`) | Nullable field (`\| null`) |
+| Pointer field with `omitempty` | Optional and nullable field (`?: T \| null`) |
+| Field with `validate:"required"` | Required field (even if pointer or has `omitempty`) |
+| Field with `binding:"required"` | Required field (even if pointer or has `omitempty`) |
+| Array of pointers (`[]*T`) | Array of non-nullable elements (`T[]`) |
 
 ## Quick Example
 
@@ -137,7 +142,7 @@ export interface User {
   name: string;
   email: string;
   created_at: string /* RFC3339 */;
-  address?: Address;
+  address?: Address | null;
 }
 
 /**

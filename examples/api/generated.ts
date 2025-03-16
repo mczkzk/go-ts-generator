@@ -1,23 +1,11 @@
 // This file is auto-generated. Do not edit directly.
-// Generated at: 2025-03-16 13:20:37
+// Generated at: 2025-03-16 19:29:55
 // Note: This file includes both exported and unexported types and fields.
 
 /* eslint-disable */
 
 // Placeholders for undefined types
 type FileHeader = any;
-
-/**
- * Address represents a physical address in API requests/responses
- */
-export interface Address {
-  street_line1: string;
-  street_line2?: string;
-  city: string;
-  state: string;
-  postal_code: string;
-  country: string;
-}
 
 /**
  * SearchParams represents query parameters for search endpoints
@@ -38,6 +26,119 @@ export interface LoginForm {
   user: string;
   pass: string;
   remember: boolean;
+}
+
+/**
+ * MixedParamStruct demonstrates priority between param and json tags
+ */
+export interface MixedParamStruct {
+  id: number;
+  name: string;
+  json_only: string;
+  param_only: string;
+}
+
+/**
+ * SearchForm represents a search form with various filters
+ */
+export interface SearchForm {
+  /**
+   * @validation
+   *   - validate: omitempty,max=100
+   */
+  query: string;
+  /**
+   * @validation
+   *   - validate: omitempty,dive,max=50
+   */
+  categories: string[];
+  /**
+   * @validation
+   *   - validate: omitempty,min=0
+   */
+  minPrice?: number | null;
+  /**
+   * @validation
+   *   - validate: omitempty,gtfield=MinPrice
+   */
+  maxPrice?: number | null;
+  /**
+   * @validation
+   *   - validate: omitempty,oneof=price
+   */
+  sortBy: string;
+  /**
+   * @validation
+   *   - validate: omitempty,oneof=asc
+   */
+  sortOrder: string;
+  /**
+   * @validation
+   *   - validate: min=1
+   */
+  page: number;
+  /**
+   * @validation
+   *   - validate: min=1,max=100
+   */
+  limit: number;
+}
+
+/**
+ * NullableFieldsExample demonstrates different combinations of nullable and required fields
+ */
+export interface NullableFieldsExample {
+  /**
+   * @validation
+   *   - validate: required
+   */
+  required_field: string;
+  optional_field?: string;
+  nullable_field?: string | null;
+  nullable_optional_field?: string | null;
+  /**
+   * @validation
+   *   - validate: required
+   */
+  nullable_required_field: string | null;
+  /**
+   * @validation
+   *   - binding: required
+   */
+  binding_required_field: string;
+}
+
+/**
+ * UserRequest represents a request to create or update a user
+ */
+export interface UserRequest {
+  name: string;
+  email: string;
+  address: Address;
+}
+
+/**
+ * UserResponse represents an API response with user data
+ */
+export interface UserResponse {
+  user_id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  created_at: string /* RFC3339 */;
+  updated_at: string /* RFC3339 */;
+}
+
+/**
+ * Address represents a physical address in API requests/responses
+ */
+export interface Address {
+  street_line1: string;
+  street_line2?: string;
+  city: string;
+  state: string;
+  postal_code: string;
+  country: string;
 }
 
 /**
@@ -77,71 +178,6 @@ export interface RegisterForm {
 }
 
 /**
- * RouteParams represents URL parameters in a route
- */
-export interface RouteParams {
-  id: number;
-  postId: number;
-  commentId: string;
-  category_id: string;
-}
-
-/**
- * SearchForm represents a search form with various filters
- */
-export interface SearchForm {
-  /**
-   * @validation
-   *   - validate: omitempty,max=100
-   */
-  query: string;
-  /**
-   * @validation
-   *   - validate: omitempty,dive,max=50
-   */
-  categories: string[];
-  /**
-   * @validation
-   *   - validate: omitempty,min=0
-   */
-  minPrice?: number;
-  /**
-   * @validation
-   *   - validate: omitempty,gtfield=MinPrice
-   */
-  maxPrice?: number;
-  /**
-   * @validation
-   *   - validate: omitempty,oneof=price
-   */
-  sortBy: string;
-  /**
-   * @validation
-   *   - validate: omitempty,oneof=asc
-   */
-  sortOrder: string;
-  /**
-   * @validation
-   *   - validate: min=1
-   */
-  page: number;
-  /**
-   * @validation
-   *   - validate: min=1,max=100
-   */
-  limit: number;
-}
-
-/**
- * UserRequest represents a request to create or update a user
- */
-export interface UserRequest {
-  name: string;
-  email: string;
-  address: Address;
-}
-
-/**
  * MixedTagsStruct demonstrates priority between JSON and form tags
  */
 export interface MixedTagsStruct {
@@ -160,29 +196,17 @@ export interface FileUploadForm {
   user_id: number;
   title: string;
   description: string;
-  file?: FileHeader;
+  file?: FileHeader | null;
   images?: FileHeader[];
 }
 
 /**
- * MixedParamStruct demonstrates priority between param and json tags
+ * RouteParams represents URL parameters in a route
  */
-export interface MixedParamStruct {
+export interface RouteParams {
   id: number;
-  name: string;
-  json_only: string;
-  param_only: string;
-}
-
-/**
- * UserResponse represents an API response with user data
- */
-export interface UserResponse {
-  user_id: number;
-  first_name: string;
-  last_name: string;
-  email: string;
-  created_at: string /* RFC3339 */;
-  updated_at: string /* RFC3339 */;
+  postId: number;
+  commentId: string;
+  category_id: string;
 }
 

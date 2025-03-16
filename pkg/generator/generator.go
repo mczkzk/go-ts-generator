@@ -213,8 +213,9 @@ func CollectTypeDefinitions(sourceDir string) ([]TypeScriptType, error) {
 
 											// Parse tags
 											jsonName := fieldName
-											optional := isPointer        // Pointer types are optional
+											optional := isPointer        // Pointer types are optional by default
 											var validationRules []string // Store validation rules for JSDoc
+											isRequired := false          // Track if the field is explicitly required
 
 											if field.Tag != nil {
 												tag := strings.Trim(field.Tag.Value, "`")
@@ -226,11 +227,19 @@ func CollectTypeDefinitions(sourceDir string) ([]TypeScriptType, error) {
 												// Add binding validation rules if present
 												if bindingTag != "" {
 													validationRules = append(validationRules, "binding: "+bindingTag)
+													// Check if binding contains "required"
+													if strings.Contains(bindingTag, "required") {
+														isRequired = true
+													}
 												}
 
 												// Add validate validation rules if present
 												if validateTag != "" {
 													validationRules = append(validationRules, "validate: "+validateTag)
+													// Check if validate contains "required"
+													if strings.Contains(validateTag, "required") {
+														isRequired = true
+													}
 												}
 
 												// Parse tags in order of priority: json, form, param, query
@@ -284,6 +293,11 @@ func CollectTypeDefinitions(sourceDir string) ([]TypeScriptType, error) {
 														}
 													}
 												}
+											}
+
+											// If the field is explicitly required, it's not optional
+											if isRequired {
+												optional = false
 											}
 
 											// Always use the tag name if available, without converting to camelCase
@@ -610,7 +624,7 @@ func getTypeString(expr ast.Expr) (string, bool) {
 		if starExpr, isPointer := t.Elt.(*ast.StarExpr); isPointer {
 			// For array of pointers, get the base type
 			baseType, _ := getTypeString(starExpr.X)
-			// Return as an array type without null | undefined
+			// Return as an array type with nullable elements
 			return baseType + "[]", true
 		}
 		// Regular array type
@@ -628,7 +642,7 @@ func getTypeString(expr ast.Expr) (string, bool) {
 	case *ast.StarExpr:
 		// For pointer types, get the base type and return a flag indicating it's a pointer
 		baseType, _ := getTypeString(t.X)
-		return baseType, true
+		return baseType + " | null", true
 	case *ast.InterfaceType:
 		return "any", false
 	default:
@@ -657,11 +671,20 @@ func GenerateTypeScriptTypes(types []TypeScriptType, targetFile string) error {
 
 	// Collect undefined types
 	undefinedTypes := make(map[string]bool)
+	processedNullableTypes := make(map[string]bool)
+
 	for _, t := range types {
 		for _, field := range t.Fields {
+			// Extract base type from nullable types (remove " | null" suffix)
+			baseType := field.Type
+			if strings.HasSuffix(baseType, " | null") {
+				baseType = strings.TrimSuffix(baseType, " | null")
+				processedNullableTypes[baseType] = true
+			}
+
 			// Collect types that are not basic types and not defined
-			if !isBasicType(field.Type) && !typeExists(field.Type, types) {
-				undefinedTypes[field.Type] = true
+			if !isBasicType(baseType) && !typeExists(baseType, types) {
+				undefinedTypes[baseType] = true
 			}
 		}
 	}
@@ -684,7 +707,7 @@ func GenerateTypeScriptTypes(types []TypeScriptType, targetFile string) error {
 
 		// Process non-array types first
 		for typeName := range undefinedTypes {
-			if !strings.HasSuffix(typeName, "[]") {
+			if !strings.HasSuffix(typeName, "[]") && !isReservedTypeName(typeName) {
 				fmt.Fprintf(file, "type %s = any;\n", typeName)
 				processedTypes[typeName] = true
 			}
@@ -695,7 +718,7 @@ func GenerateTypeScriptTypes(types []TypeScriptType, targetFile string) error {
 			if strings.HasSuffix(typeName, "[]") {
 				// Extract base type from array type
 				baseType := strings.TrimSuffix(typeName, "[]")
-				if !processedTypes[baseType] {
+				if !processedTypes[baseType] && !isReservedTypeName(baseType) {
 					fmt.Fprintf(file, "type %s = any;\n", baseType)
 					processedTypes[baseType] = true
 				}
@@ -898,4 +921,23 @@ func toCamelCase(s string) string {
 
 	// For PascalCase
 	return strings.ToLower(s[:1]) + s[1:]
+}
+
+// isReservedTypeName checks if a type name is a reserved TypeScript keyword
+func isReservedTypeName(name string) bool {
+	reservedNames := map[string]bool{
+		"string":    true,
+		"number":    true,
+		"boolean":   true,
+		"any":       true,
+		"void":      true,
+		"null":      true,
+		"undefined": true,
+		"object":    true,
+		"symbol":    true,
+		"bigint":    true,
+		"never":     true,
+		"unknown":   true,
+	}
+	return reservedNames[name]
 }

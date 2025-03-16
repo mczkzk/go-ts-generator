@@ -104,3 +104,24 @@ type SearchForm struct {
 	Page       int      `form:"page" json:"page" validate:"min=1"`
 	Limit      int      `form:"limit" json:"limit" validate:"min=1,max=100"`
 }
+
+// NullableFieldsExample demonstrates different combinations of nullable and required fields
+type NullableFieldsExample struct {
+	// Basic required field
+	RequiredField string `json:"required_field" validate:"required"`
+
+	// Optional field with omitempty
+	OptionalField string `json:"optional_field,omitempty"`
+
+	// Nullable field (pointer type)
+	NullableField *string `json:"nullable_field"`
+
+	// Nullable and optional field
+	NullableOptionalField *string `json:"nullable_optional_field,omitempty"`
+
+	// Nullable but required field
+	NullableRequiredField *string `json:"nullable_required_field" validate:"required"`
+
+	// Field with binding:required
+	BindingRequiredField string `json:"binding_required_field" binding:"required"`
+}

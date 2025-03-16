@@ -1,5 +1,5 @@
 // This file is auto-generated. Do not edit directly.
-// Generated at: 2025-03-16 14:02:04
+// Generated at: 2025-03-16 19:32:53
 // Note: This file includes both exported and unexported types and fields.
 
 /* eslint-disable */
@@ -15,7 +15,7 @@ export interface Product {
   /**
    * Pointer type without omitempty
    */
-  category?: Category;
+  category?: Category | null;
   created_at: string /* RFC3339 */;
 }
 
@@ -60,7 +60,7 @@ export type StringArray = string[];
 /**
  * CategoryMap is a map of category IDs to categories
  */
-export type CategoryMap = Record<number, Category>;
+export type CategoryMap = Record<number, Category | null>;
 
 /**
  * User represents a user in the system
@@ -71,7 +71,7 @@ export interface User {
   email: string;
   created_at: string /* RFC3339 */;
   updated_at: string /* RFC3339 */;
-  address?: Address;
+  address?: Address | null;
 }
 
 /**
