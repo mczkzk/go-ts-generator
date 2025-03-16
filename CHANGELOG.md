@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2025-03-16
+
+### Added
+- Improved Swagger/OpenAPI annotation parsing for better endpoint detection
+- Support for different path parameter formats (`:param` and `{param}`)
+- Support for alternative @Success annotation formats
+- Enhanced handling of types with package prefixes (e.g., `responses.TypeName`)
+- Better detection of function-level Swagger annotations
+
+### Fixed
+- Fixed issue where endpoint information wasn't extracted from certain Swagger annotation formats
+- Fixed handling of path parameters in @Router annotations
+- Improved type name extraction from package-qualified names
+
 ## [0.5.0] - 2025-03-15
 
 ### Added

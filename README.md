@@ -167,7 +167,6 @@ export interface unexportedType {
   privateField: number;
 }
 ```
-
 For more detailed examples, please see the [examples](./examples) directory.
 
 ## License
