@@ -121,9 +121,9 @@ type CategoryMap map[int]*Category
 	}
 
 	// Check for array of pointers type alias
-	if !strings.Contains(tsContentStr, "export type UserList = (User | null | undefined)[];") {
+	if !strings.Contains(tsContentStr, "export type UserList = User[];") {
 		t.Error("Generated TypeScript does not handle array of pointers type alias correctly")
-		t.Logf("Expected 'export type UserList = (User | null | undefined)[];' but got something else in:\n%s", tsContentStr)
+		t.Logf("Expected 'export type UserList = User[];' but got something else in:\n%s", tsContentStr)
 	}
 
 	// Check for string array type alias

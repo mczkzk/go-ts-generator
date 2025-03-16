@@ -1,5 +1,5 @@
 // This file is auto-generated. Do not edit directly.
-// Generated at: 2025-03-16 12:29:53
+// Generated at: 2025-03-16 13:14:25
 // Note: This file includes both exported and unexported types and fields.
 
 /* eslint-disable */
@@ -8,49 +8,36 @@
 type FileHeader = any;
 
 /**
- * SearchForm represents a search form with various filters
+ * Address represents a physical address in API requests/responses
  */
-export interface SearchForm {
-  /**
-   * @validation
-   *   - validate: omitempty,max=100
-   */
-  query: string;
-  /**
-   * @validation
-   *   - validate: omitempty,dive,max=50
-   */
-  categories: string[];
-  /**
-   * @validation
-   *   - validate: omitempty,min=0
-   */
-  minPrice?: number;
-  /**
-   * @validation
-   *   - validate: omitempty,gtfield=MinPrice
-   */
-  maxPrice?: number;
-  /**
-   * @validation
-   *   - validate: omitempty,oneof=price
-   */
-  sortBy: string;
-  /**
-   * @validation
-   *   - validate: omitempty,oneof=asc
-   */
-  sortOrder: string;
-  /**
-   * @validation
-   *   - validate: min=1
-   */
-  page: number;
-  /**
-   * @validation
-   *   - validate: min=1,max=100
-   */
-  limit: number;
+export interface Address {
+  street_line1: string;
+  street_line2?: string;
+  city: string;
+  state: string;
+  postal_code: string;
+  country: string;
+}
+
+/**
+ * FileUploadForm represents a form with file uploads
+ */
+export interface FileUploadForm {
+  user_id: number;
+  title: string;
+  description: string;
+  file?: FileHeader;
+  images?: FileHeader[];
+}
+
+/**
+ * RouteParams represents URL parameters in a route
+ */
+export interface RouteParams {
+  id: number;
+  postId: number;
+  commentId: string;
+  category_id: string;
 }
 
 /**
@@ -67,6 +54,27 @@ export interface UserRequest {
 }
 
 /**
+ * UserResponse represents an API response with user data
+ *
+ * @api Used in the following endpoints:
+ * - post /users (Response)
+ * - put /users/{id} (Response)
+ * - get /users/search (Response)
+ * - post /auth/login (Response)
+ * - post /auth/register (Response)
+ * - get /users (Response)
+ * - get /users/{id} (Response)
+ */
+export interface UserResponse {
+  user_id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  created_at: string /* RFC3339 */;
+  updated_at: string /* RFC3339 */;
+}
+
+/**
  * SearchParams represents query parameters for search endpoints
  */
 export interface SearchParams {
@@ -76,6 +84,18 @@ export interface SearchParams {
   sort_by: string;
   sort_order: string;
   filters: string[];
+}
+
+/**
+ * LoginForm represents a login form submission
+ *
+ * @api Used in the following endpoints:
+ * - post /auth/login (Request)
+ */
+export interface LoginForm {
+  user: string;
+  pass: string;
+  remember: boolean;
 }
 
 /**
@@ -130,17 +150,6 @@ export interface MixedTagsStruct {
 }
 
 /**
- * FileUploadForm represents a form with file uploads
- */
-export interface FileUploadForm {
-  user_id: number;
-  title: string;
-  description: string;
-  file?: FileHeader;
-  images?: (FileHeader | null | undefined)[];
-}
-
-/**
  * MixedParamStruct demonstrates priority between param and json tags
  */
 export interface MixedParamStruct {
@@ -151,57 +160,48 @@ export interface MixedParamStruct {
 }
 
 /**
- * UserResponse represents an API response with user data
- *
- * @api Used in the following endpoints:
- * - get /users (Response)
- * - get /users/{id} (Response)
- * - post /users (Response)
- * - put /users/{id} (Response)
- * - get /users/search (Response)
- * - post /auth/login (Response)
- * - post /auth/register (Response)
+ * SearchForm represents a search form with various filters
  */
-export interface UserResponse {
-  user_id: number;
-  first_name: string;
-  last_name: string;
-  email: string;
-  created_at: string /* RFC3339 */;
-  updated_at: string /* RFC3339 */;
-}
-
-/**
- * Address represents a physical address in API requests/responses
- */
-export interface Address {
-  street_line1: string;
-  street_line2?: string;
-  city: string;
-  state: string;
-  postal_code: string;
-  country: string;
-}
-
-/**
- * LoginForm represents a login form submission
- *
- * @api Used in the following endpoints:
- * - post /auth/login (Request)
- */
-export interface LoginForm {
-  user: string;
-  pass: string;
-  remember: boolean;
-}
-
-/**
- * RouteParams represents URL parameters in a route
- */
-export interface RouteParams {
-  id: number;
-  postId: number;
-  commentId: string;
-  category_id: string;
+export interface SearchForm {
+  /**
+   * @validation
+   *   - validate: omitempty,max=100
+   */
+  query: string;
+  /**
+   * @validation
+   *   - validate: omitempty,dive,max=50
+   */
+  categories: string[];
+  /**
+   * @validation
+   *   - validate: omitempty,min=0
+   */
+  minPrice?: number;
+  /**
+   * @validation
+   *   - validate: omitempty,gtfield=MinPrice
+   */
+  maxPrice?: number;
+  /**
+   * @validation
+   *   - validate: omitempty,oneof=price
+   */
+  sortBy: string;
+  /**
+   * @validation
+   *   - validate: omitempty,oneof=asc
+   */
+  sortOrder: string;
+  /**
+   * @validation
+   *   - validate: min=1
+   */
+  page: number;
+  /**
+   * @validation
+   *   - validate: min=1,max=100
+   */
+  limit: number;
 }
 

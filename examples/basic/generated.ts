@@ -1,8 +1,35 @@
 // This file is auto-generated. Do not edit directly.
-// Generated at: 2025-03-16 11:56:09
+// Generated at: 2025-03-16 13:20:32
 // Note: This file includes both exported and unexported types and fields.
 
 /* eslint-disable */
+
+/**
+ * UserList represents a list of users
+ */
+export type UserList = User[];
+
+/**
+ * StringArray is a simple string array
+ */
+export type StringArray = string[];
+
+/**
+ * CategoryMap is a map of category IDs to categories
+ */
+export type CategoryMap = Record<number, Category>;
+
+/**
+ * User represents a user in the system
+ */
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  createdAt: string /* RFC3339 */;
+  updatedAt: string /* RFC3339 */;
+  address?: Address;
+}
 
 /**
  * Address represents a physical address
@@ -56,32 +83,5 @@ export interface unexportedType {
    * It cannot be accessed directly from outside the package.
    */
   field2: number;
-}
-
-/**
- * UserList represents a list of users
- */
-export type UserList = (User | null | undefined)[];
-
-/**
- * StringArray is a simple string array
- */
-export type StringArray = string[];
-
-/**
- * CategoryMap is a map of category IDs to categories
- */
-export type CategoryMap = Record<number, Category>;
-
-/**
- * User represents a user in the system
- */
-export interface User {
-  id: number;
-  name: string;
-  email: string;
-  createdAt: string /* RFC3339 */;
-  updatedAt: string /* RFC3339 */;
-  address?: Address;
 }
 

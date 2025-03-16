@@ -13,7 +13,6 @@ A Go module that generates TypeScript type definitions from Go struct definition
 - Special handling for API-related types (preserves exact field names)
 - Handles pointer types as optional fields
 - Supports `omitempty` tag for optional fields
-- Handles arrays of pointers as `(Type | null | undefined)[]` in TypeScript
 - Includes validation rules from struct tags as JSDoc comments
 - Parses Swagger/OpenAPI annotations to add API endpoint information to type comments
 - Supports processing multiple source directories in a single command
@@ -95,7 +94,7 @@ Check out the [examples](./examples) directory for complete usage examples:
 | int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64 | number |
 | time.Time | string /* RFC3339 */ |
 | []T | T[] |
-| []*T | (T \| null \| undefined)[] |
+| []*T | T[] |
 | map[K]V | Record<K, V> |
 | interface{} | any |
 | *T | T? (optional) |

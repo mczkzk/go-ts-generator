@@ -613,8 +613,8 @@ func getTypeString(expr ast.Expr) (string, bool) {
 		if starExpr, isPointer := t.Elt.(*ast.StarExpr); isPointer {
 			// For array of pointers, get the base type
 			baseType, _ := getTypeString(starExpr.X)
-			// Return as a union type array (Type | null | undefined)[]
-			return "(" + baseType + " | null | undefined)[]", true
+			// Return as an array type without null | undefined
+			return baseType + "[]", true
 		}
 		// Regular array type
 		elemType, _ := getTypeString(t.Elt)
@@ -687,7 +687,7 @@ func GenerateTypeScriptTypes(types []TypeScriptType, targetFile string) error {
 
 		// Process non-array types first
 		for typeName := range undefinedTypes {
-			if !strings.HasSuffix(typeName, "[]") && !strings.HasPrefix(typeName, "(") {
+			if !strings.HasSuffix(typeName, "[]") {
 				fmt.Fprintf(file, "type %s = any;\n", typeName)
 				processedTypes[typeName] = true
 			}
@@ -695,14 +695,7 @@ func GenerateTypeScriptTypes(types []TypeScriptType, targetFile string) error {
 
 		// Then process array types
 		for typeName := range undefinedTypes {
-			if strings.HasPrefix(typeName, "(") && strings.HasSuffix(typeName, ")[]") {
-				// Extract base type from "(Type | null | undefined)[]" format
-				baseType := strings.TrimSuffix(strings.TrimPrefix(typeName, "("), " | null | undefined)[]")
-				if !processedTypes[baseType] {
-					fmt.Fprintf(file, "type %s = any;\n", baseType)
-					processedTypes[baseType] = true
-				}
-			} else if strings.HasSuffix(typeName, "[]") {
+			if strings.HasSuffix(typeName, "[]") {
 				// Extract base type from array type
 				baseType := strings.TrimSuffix(typeName, "[]")
 				if !processedTypes[baseType] {
@@ -874,13 +867,6 @@ func isBasicType(typeName string) bool {
 
 // typeExists determines if a specified type is defined
 func typeExists(typeName string, types []TypeScriptType) bool {
-	// For array types with nullable elements, extract the base type
-	if strings.HasPrefix(typeName, "(") && strings.HasSuffix(typeName, ")[]") {
-		// Extract the base type from "(Type | null | undefined)[]"
-		baseType := strings.TrimSuffix(strings.TrimPrefix(typeName, "("), " | null | undefined)[]")
-		return typeExists(baseType, types)
-	}
-
 	// For array types, check the element type
 	if strings.HasSuffix(typeName, "[]") {
 		return typeExists(strings.TrimSuffix(typeName, "[]"), types)
