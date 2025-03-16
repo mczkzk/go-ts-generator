@@ -1,11 +1,56 @@
 // This file is auto-generated. Do not edit directly.
-// Generated at: 2025-03-16 19:34:17
+// Generated at: 2025-03-16 20:31:10
 // Note: This file includes both exported and unexported types and fields.
 
 /* eslint-disable */
 
 // Placeholders for undefined types
 type FileHeader = any;
+
+/**
+ * NullableFieldsExample demonstrates different combinations of nullable and required fields
+ */
+export interface NullableFieldsExample {
+  /**
+   * @validation
+   *   - validate: required
+   */
+  required_field: string;
+  optional_field?: string;
+  nullable_field?: string | null;
+  nullable_optional_field?: string | null;
+  /**
+   * @validation
+   *   - validate: required
+   */
+  nullable_required_field: string | null;
+  /**
+   * @validation
+   *   - binding: required
+   */
+  binding_required_field: string;
+}
+
+/**
+ * UserResponse represents an API response with user data
+ *
+ * @api Used in the following endpoints:
+ * - get /users (Response)
+ * - get /users/{id} (Response)
+ * - post /users (Response)
+ * - put /users/{id} (Response)
+ * - get /users/search (Response)
+ * - post /auth/login (Response)
+ * - post /auth/register (Response)
+ */
+export interface UserResponse {
+  user_id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  created_at: string /* RFC3339 */;
+  updated_at: string /* RFC3339 */;
+}
 
 /**
  * SearchParams represents query parameters for search endpoints
@@ -20,15 +65,73 @@ export interface SearchParams {
 }
 
 /**
- * LoginForm represents a login form submission
+ * RegisterForm represents a user registration form
  *
  * @api Used in the following endpoints:
- * - post /auth/login (Request)
+ * - post /auth/register (Request)
  */
-export interface LoginForm {
-  user: string;
-  pass: string;
-  remember: boolean;
+export interface RegisterForm {
+  /**
+   * @validation
+   *   - binding: required
+   *   - validate: min=3,max=50
+   */
+  username: string;
+  /**
+   * @validation
+   *   - binding: required
+   *   - validate: email
+   */
+  email: string;
+  /**
+   * @validation
+   *   - binding: required
+   *   - validate: min=8,containsAny=!@#$%^&*
+   */
+  password: string;
+  /**
+   * @validation
+   *   - binding: required
+   *   - validate: eqfield=Password
+   */
+  confirm_password: string;
+  /**
+   * @validation
+   *   - binding: required
+   *   - validate: eq=true
+   */
+  accept_terms: boolean;
+}
+
+/**
+ * MixedParamStruct demonstrates priority between param and json tags
+ */
+export interface MixedParamStruct {
+  id: number;
+  name: string;
+  json_only: string;
+  param_only: string;
+}
+
+/**
+ * FileUploadForm represents a form with file uploads
+ */
+export interface FileUploadForm {
+  user_id: number;
+  title: string;
+  description: string;
+  file?: FileHeader | null;
+  images?: (FileHeader | null)[];
+}
+
+/**
+ * RouteParams represents URL parameters in a route
+ */
+export interface RouteParams {
+  id: number;
+  postId: number;
+  commentId: string;
+  category_id: string;
 }
 
 /**
@@ -103,6 +206,18 @@ export interface Address {
 }
 
 /**
+ * LoginForm represents a login form submission
+ *
+ * @api Used in the following endpoints:
+ * - post /auth/login (Request)
+ */
+export interface LoginForm {
+  user: string;
+  pass: string;
+  remember: boolean;
+}
+
+/**
  * MixedTagsStruct demonstrates priority between JSON and form tags
  */
 export interface MixedTagsStruct {
@@ -112,120 +227,5 @@ export interface MixedTagsStruct {
   json_only: string;
   form_only: string;
   NoTags: string;
-}
-
-/**
- * FileUploadForm represents a form with file uploads
- */
-export interface FileUploadForm {
-  user_id: number;
-  title: string;
-  description: string;
-  file?: FileHeader | null;
-  images?: FileHeader[];
-}
-
-/**
- * RouteParams represents URL parameters in a route
- */
-export interface RouteParams {
-  id: number;
-  postId: number;
-  commentId: string;
-  category_id: string;
-}
-
-/**
- * MixedParamStruct demonstrates priority between param and json tags
- */
-export interface MixedParamStruct {
-  id: number;
-  name: string;
-  json_only: string;
-  param_only: string;
-}
-
-/**
- * NullableFieldsExample demonstrates different combinations of nullable and required fields
- */
-export interface NullableFieldsExample {
-  /**
-   * @validation
-   *   - validate: required
-   */
-  required_field: string;
-  optional_field?: string;
-  nullable_field?: string | null;
-  nullable_optional_field?: string | null;
-  /**
-   * @validation
-   *   - validate: required
-   */
-  nullable_required_field: string | null;
-  /**
-   * @validation
-   *   - binding: required
-   */
-  binding_required_field: string;
-}
-
-/**
- * UserResponse represents an API response with user data
- *
- * @api Used in the following endpoints:
- * - post /auth/login (Response)
- * - post /auth/register (Response)
- * - get /users (Response)
- * - get /users/{id} (Response)
- * - post /users (Response)
- * - put /users/{id} (Response)
- * - get /users/search (Response)
- */
-export interface UserResponse {
-  user_id: number;
-  first_name: string;
-  last_name: string;
-  email: string;
-  created_at: string /* RFC3339 */;
-  updated_at: string /* RFC3339 */;
-}
-
-/**
- * RegisterForm represents a user registration form
- *
- * @api Used in the following endpoints:
- * - post /auth/register (Request)
- */
-export interface RegisterForm {
-  /**
-   * @validation
-   *   - binding: required
-   *   - validate: min=3,max=50
-   */
-  username: string;
-  /**
-   * @validation
-   *   - binding: required
-   *   - validate: email
-   */
-  email: string;
-  /**
-   * @validation
-   *   - binding: required
-   *   - validate: min=8,containsAny=!@#$%^&*
-   */
-  password: string;
-  /**
-   * @validation
-   *   - binding: required
-   *   - validate: eqfield=Password
-   */
-  confirm_password: string;
-  /**
-   * @validation
-   *   - binding: required
-   *   - validate: eq=true
-   */
-  accept_terms: boolean;
 }
 

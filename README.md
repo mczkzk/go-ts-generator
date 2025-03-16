@@ -101,7 +101,6 @@ Check out the [examples](./examples) directory for complete usage examples:
 | Pointer field with `omitempty` | Optional and nullable field (`?: T \| null`) |
 | Field with `validate:"required"` | Required field (even if pointer or has `omitempty`) |
 | Field with `binding:"required"` | Required field (even if pointer or has `omitempty`) |
-| Array of pointers (`[]*T`) | Array of non-nullable elements (`T[]`) |
 
 ## Quick Example
 
@@ -130,7 +129,6 @@ type unexportedType struct {
 	privateField int    `json:"privateField"`
 }
 ```
-
 ### TypeScript Output
 
 ```typescript

@@ -625,7 +625,7 @@ func getTypeString(expr ast.Expr) (string, bool) {
 			// For array of pointers, get the base type
 			baseType, _ := getTypeString(starExpr.X)
 			// Return as an array type with nullable elements
-			return baseType + "[]", true
+			return "(" + baseType + " | null)[]", true
 		}
 		// Regular array type
 		elemType, _ := getTypeString(t.Elt)
@@ -682,8 +682,13 @@ func GenerateTypeScriptTypes(types []TypeScriptType, targetFile string) error {
 				processedNullableTypes[baseType] = true
 			}
 
+			// Remove parentheses from types like "(User | null)[]"
+			if strings.HasPrefix(baseType, "(") && strings.Contains(baseType, ")[]") {
+				baseType = strings.TrimSuffix(strings.TrimPrefix(baseType, "("), ")[]") + "[]"
+			}
+
 			// Collect types that are not basic types and not defined
-			if !isBasicType(baseType) && !typeExists(baseType, types) {
+			if !isBasicType(baseType) && !typeExists(baseType, types) && !strings.Contains(baseType, " | ") && !strings.Contains(baseType, "(") && !strings.Contains(baseType, ")") {
 				undefinedTypes[baseType] = true
 			}
 		}
