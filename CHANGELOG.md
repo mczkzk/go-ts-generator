@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2025-03-16
+
+### Changed
+- Improved handling of nullable types in TypeScript output
+- Modified array of pointers (`[]*T`) to be properly represented as `(T | null)[]` in TypeScript
+- Updated type conversion rules for better type safety
+
+### Fixed
+- Fixed TypeScript linter error with complex type aliases
+- Fixed handling of nullable array elements in TypeScript output
+
 ## [0.8.1] - 2025-03-16
 
 ### Fixed
