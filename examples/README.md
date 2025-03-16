@@ -8,7 +8,7 @@ The `basic` directory contains standard Go structs that demonstrate:
 - Basic type conversion
 - Handling of pointer types (both with and without `omitempty`)
 - Handling of unexported types and fields
-- Conversion of field names to camelCase
+- Preservation of original field names from struct tags
 
 Files:
 - `models.go` - Go struct definitions
@@ -17,7 +17,6 @@ Files:
 ## API Example
 
 The `api` directory contains API-related structs that demonstrate:
-- Preservation of field names in API types (no camelCase conversion)
 - Handling of query tags
 - Handling of request/response types
 

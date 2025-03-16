@@ -9,8 +9,7 @@ A Go module that generates TypeScript type definitions from Go struct definition
 - Converts Go types to appropriate TypeScript types
 - Preserves comments from Go code in the generated TypeScript
 - Handles both exported and unexported types and fields
-- Converts field names to camelCase for non-API types
-- Special handling for API-related types (preserves exact field names)
+- Preserves original field names from struct tags
 - Handles pointer types as optional fields
 - Supports `omitempty` tag for optional fields
 - Includes validation rules from struct tags as JSDoc comments

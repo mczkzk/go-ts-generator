@@ -114,10 +114,10 @@ type CategoryMap map[int]*Category
 		t.Error("Generated TypeScript does not handle pointer fields as optional")
 	}
 
-	// Check for time.Time conversion and camelCase field names
-	if !strings.Contains(tsContentStr, "createdAt: string /* RFC3339 */;") {
-		t.Error("Generated TypeScript does not handle time.Time correctly or convert field names to camelCase")
-		fmt.Printf("Looking for 'createdAt: string /* RFC3339 */;' in:\n%s\n", tsContentStr)
+	// Check for time.Time conversion and original field names from JSON tags
+	if !strings.Contains(tsContentStr, "created_at: string /* RFC3339 */;") {
+		t.Error("Generated TypeScript does not handle time.Time correctly or preserve original field names from JSON tags")
+		fmt.Printf("Looking for 'created_at: string /* RFC3339 */;' in:\n%s\n", tsContentStr)
 	}
 
 	// Check for array of pointers type alias
