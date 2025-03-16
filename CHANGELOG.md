@@ -5,7 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.7.0] - 2025-03-17
+## [0.8.0] - 2025-03-16
+
+### Changed
+- Modified field name handling to always preserve original field names from JSON, form, param, and query tags
+- Removed automatic conversion of snake_case to camelCase for non-API types
+- Field names in TypeScript interfaces now exactly match the names specified in the struct tags
+
+## [0.7.0] - 2025-03-16
 
 ### Changed
 - Simplified TypeScript type generation for arrays of pointers (`[]*Type`) to use `Type[]` instead of `(Type | null | undefined)[]`
