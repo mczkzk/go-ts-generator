@@ -137,7 +137,7 @@ export interface User {
   id: number;
   name: string;
   email: string;
-  createdAt: string /* RFC3339 */;
+  created_at: string /* RFC3339 */;
   address?: Address;
 }
 

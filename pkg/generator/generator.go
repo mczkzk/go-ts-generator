@@ -286,11 +286,8 @@ func CollectTypeDefinitions(sourceDir string) ([]TypeScriptType, error) {
 												}
 											}
 
-											// Convert to camelCase if not API-related
+											// Always use the tag name if available, without converting to camelCase
 											finalFieldName := jsonName
-											if !tsType.IsAPIType && isFieldExported {
-												finalFieldName = toCamelCase(jsonName)
-											}
 
 											tsType.Fields = append(tsType.Fields, TypeScriptField{
 												Name:       finalFieldName,
