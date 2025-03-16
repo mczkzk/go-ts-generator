@@ -105,8 +105,8 @@ type CategoryMap map[int]*Category
 	}
 
 	// Check for unexported type handling
-	if !strings.Contains(tsContentStr, "export interface UnexportedType {") {
-		t.Error("Generated TypeScript does not convert unexported types to PascalCase")
+	if !strings.Contains(tsContentStr, "export interface unexportedType {") {
+		t.Error("Generated TypeScript does not keep unexported types in lowercase")
 	}
 
 	// Check for pointer field handling

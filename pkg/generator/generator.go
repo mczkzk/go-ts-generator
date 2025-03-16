@@ -450,12 +450,8 @@ func getTypeString(expr ast.Expr) (string, bool) {
 		case "time.Time":
 			return "string /* RFC3339 */", false
 		default:
-			// Convert non-exported type names to PascalCase
-			typeName := t.Name
-			if len(typeName) > 0 && unicode.IsLower(rune(typeName[0])) {
-				typeName = strings.ToUpper(typeName[:1]) + typeName[1:]
-			}
-			return typeName, false
+			// Return type name as is without converting to PascalCase
+			return t.Name, false
 		}
 	case *ast.ArrayType:
 		// Check if the element type is a pointer
@@ -628,14 +624,8 @@ func GenerateTypeScriptTypes(types []TypeScriptType, targetFile string) error {
 			fmt.Fprintln(file, " */")
 		}
 
-		// Type names are always in PascalCase (to match TypeScript naming conventions)
+		// Type names are kept as they are in the original Go code
 		typeName := t.Name
-		if !t.IsExported {
-			// For unexported types, convert to PascalCase
-			if len(typeName) > 0 && unicode.IsLower(rune(typeName[0])) {
-				typeName = strings.ToUpper(typeName[:1]) + typeName[1:]
-			}
-		}
 
 		// Write interface definition or type alias
 		if t.IsInterface {
@@ -741,20 +731,8 @@ func typeExists(typeName string, types []TypeScriptType) bool {
 		return typeExists(strings.TrimSuffix(typeName, "[]"), types)
 	}
 
-	// Normalize type name (convert to PascalCase if it starts with lowercase)
-	normalizedTypeName := typeName
-	if len(normalizedTypeName) > 0 && unicode.IsLower(rune(normalizedTypeName[0])) {
-		normalizedTypeName = strings.ToUpper(normalizedTypeName[:1]) + normalizedTypeName[1:]
-	}
-
 	for _, t := range types {
-		// Normalize the type name for comparison
-		normalizedName := t.Name
-		if len(normalizedName) > 0 && unicode.IsLower(rune(normalizedName[0])) {
-			normalizedName = strings.ToUpper(normalizedName[:1]) + normalizedName[1:]
-		}
-
-		if normalizedName == normalizedTypeName {
+		if t.Name == typeName {
 			return true
 		}
 	}

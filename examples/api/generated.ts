@@ -1,44 +1,11 @@
 // This file is auto-generated. Do not edit directly.
-// Generated at: 2025-03-15 17:15:03
+// Generated at: 2025-03-16 11:54:41
 // Note: This file includes both exported and unexported types and fields.
 
 /* eslint-disable */
 
 // Placeholders for undefined types
 type FileHeader = any;
-
-/**
- * UserRequest represents a request to create or update a user
- */
-export interface UserRequest {
-  name: string;
-  email: string;
-  address: Address;
-}
-
-/**
- * UserResponse represents an API response with user data
- */
-export interface UserResponse {
-  user_id: number;
-  first_name: string;
-  last_name: string;
-  email: string;
-  created_at: string /* RFC3339 */;
-  updated_at: string /* RFC3339 */;
-}
-
-/**
- * Address represents a physical address in API requests/responses
- */
-export interface Address {
-  street_line1: string;
-  street_line2?: string;
-  city: string;
-  state: string;
-  postal_code: string;
-  country: string;
-}
 
 /**
  * SearchParams represents query parameters for search endpoints
@@ -53,12 +20,34 @@ export interface SearchParams {
 }
 
 /**
- * LoginForm represents a login form submission
+ * RouteParams represents URL parameters in a route
  */
-export interface LoginForm {
-  user: string;
-  pass: string;
-  remember: boolean;
+export interface RouteParams {
+  id: number;
+  postId: number;
+  commentId: string;
+  category_id: string;
+}
+
+/**
+ * UserRequest represents a request to create or update a user
+ */
+export interface UserRequest {
+  name: string;
+  email: string;
+  address: Address;
+}
+
+/**
+ * Address represents a physical address in API requests/responses
+ */
+export interface Address {
+  street_line1: string;
+  street_line2?: string;
+  city: string;
+  state: string;
+  postal_code: string;
+  country: string;
 }
 
 /**
@@ -121,16 +110,6 @@ export interface FileUploadForm {
 }
 
 /**
- * RouteParams represents URL parameters in a route
- */
-export interface RouteParams {
-  id: number;
-  postId: number;
-  commentId: string;
-  category_id: string;
-}
-
-/**
  * MixedParamStruct demonstrates priority between param and json tags
  */
 export interface MixedParamStruct {
@@ -184,5 +163,26 @@ export interface SearchForm {
    *   - validate: min=1,max=100
    */
   limit: number;
+}
+
+/**
+ * UserResponse represents an API response with user data
+ */
+export interface UserResponse {
+  user_id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  created_at: string /* RFC3339 */;
+  updated_at: string /* RFC3339 */;
+}
+
+/**
+ * LoginForm represents a login form submission
+ */
+export interface LoginForm {
+  user: string;
+  pass: string;
+  remember: boolean;
 }
 

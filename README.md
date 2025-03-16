@@ -158,7 +158,7 @@ export interface Address {
  * Note: This is an unexported type. In Go code, it's defined with a lowercase identifier.
  * It cannot be accessed directly from outside the package.
  */
-export interface UnexportedType {
+export interface unexportedType {
   publicField: string;
   /**
    * Note: This is an unexported field. In Go code, it's defined with a lowercase identifier.

@@ -1,20 +1,8 @@
 // This file is auto-generated. Do not edit directly.
-// Generated at: 2025-03-15 16:41:24
+// Generated at: 2025-03-16 11:56:09
 // Note: This file includes both exported and unexported types and fields.
 
 /* eslint-disable */
-
-/**
- * User represents a user in the system
- */
-export interface User {
-  id: number;
-  name: string;
-  email: string;
-  createdAt: string /* RFC3339 */;
-  updatedAt: string /* RFC3339 */;
-  address?: Address;
-}
 
 /**
  * Address represents a physical address
@@ -57,7 +45,7 @@ export interface Category {
  * Note: This is an unexported type. In Go code, it's defined with a lowercase identifier.
  * It cannot be accessed directly from outside the package.
  */
-export interface UnexportedType {
+export interface unexportedType {
   /**
    * Note: This is an unexported field. In Go code, it's defined with a lowercase identifier.
    * It cannot be accessed directly from outside the package.
@@ -84,4 +72,16 @@ export type StringArray = string[];
  * CategoryMap is a map of category IDs to categories
  */
 export type CategoryMap = Record<number, Category>;
+
+/**
+ * User represents a user in the system
+ */
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  createdAt: string /* RFC3339 */;
+  updatedAt: string /* RFC3339 */;
+  address?: Address;
+}
 
