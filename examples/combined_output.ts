@@ -1,11 +1,31 @@
 // This file is auto-generated. Do not edit directly.
-// Generated at: 2025-03-16 20:31:10
+// Generated at: 2025-03-16 21:04:51
 // Note: This file includes both exported and unexported types and fields.
 
 /* eslint-disable */
 
 // Placeholders for undefined types
 type FileHeader = any;
+
+/**
+ * RouteParams represents URL parameters in a route
+ */
+export interface RouteParams {
+  id: number;
+  postId: number;
+  commentId: string;
+  category_id: string;
+}
+
+/**
+ * MixedParamStruct demonstrates priority between param and json tags
+ */
+export interface MixedParamStruct {
+  id: number;
+  name: string;
+  json_only: string;
+  param_only: string;
+}
 
 /**
  * NullableFieldsExample demonstrates different combinations of nullable and required fields
@@ -17,7 +37,7 @@ export interface NullableFieldsExample {
    */
   required_field: string;
   optional_field?: string;
-  nullable_field?: string | null;
+  nullable_field: string | null;
   nullable_optional_field?: string | null;
   /**
    * @validation
@@ -32,27 +52,6 @@ export interface NullableFieldsExample {
 }
 
 /**
- * UserResponse represents an API response with user data
- *
- * @api Used in the following endpoints:
- * - get /users (Response)
- * - get /users/{id} (Response)
- * - post /users (Response)
- * - put /users/{id} (Response)
- * - get /users/search (Response)
- * - post /auth/login (Response)
- * - post /auth/register (Response)
- */
-export interface UserResponse {
-  user_id: number;
-  first_name: string;
-  last_name: string;
-  email: string;
-  created_at: string /* RFC3339 */;
-  updated_at: string /* RFC3339 */;
-}
-
-/**
  * SearchParams represents query parameters for search endpoints
  */
 export interface SearchParams {
@@ -62,6 +61,30 @@ export interface SearchParams {
   sort_by: string;
   sort_order: string;
   filters: string[];
+}
+
+/**
+ * LoginForm represents a login form submission
+ *
+ * @api Used in the following endpoints:
+ * - post /auth/login (Request)
+ */
+export interface LoginForm {
+  user: string;
+  pass: string;
+  remember: boolean;
+}
+
+/**
+ * MixedTagsStruct demonstrates priority between JSON and form tags
+ */
+export interface MixedTagsStruct {
+  id: number;
+  name: string;
+  email: string;
+  json_only: string;
+  form_only: string;
+  NoTags: string;
 }
 
 /**
@@ -104,34 +127,14 @@ export interface RegisterForm {
 }
 
 /**
- * MixedParamStruct demonstrates priority between param and json tags
- */
-export interface MixedParamStruct {
-  id: number;
-  name: string;
-  json_only: string;
-  param_only: string;
-}
-
-/**
  * FileUploadForm represents a form with file uploads
  */
 export interface FileUploadForm {
   user_id: number;
   title: string;
   description: string;
-  file?: FileHeader | null;
-  images?: (FileHeader | null)[];
-}
-
-/**
- * RouteParams represents URL parameters in a route
- */
-export interface RouteParams {
-  id: number;
-  postId: number;
-  commentId: string;
-  category_id: string;
+  file: FileHeader | null;
+  images: (FileHeader | null)[];
 }
 
 /**
@@ -152,12 +155,12 @@ export interface SearchForm {
    * @validation
    *   - validate: omitempty,min=0
    */
-  minPrice?: number | null;
+  minPrice: number | null;
   /**
    * @validation
    *   - validate: omitempty,gtfield=MinPrice
    */
-  maxPrice?: number | null;
+  maxPrice: number | null;
   /**
    * @validation
    *   - validate: omitempty,oneof=price
@@ -194,6 +197,27 @@ export interface UserRequest {
 }
 
 /**
+ * UserResponse represents an API response with user data
+ *
+ * @api Used in the following endpoints:
+ * - get /users (Response)
+ * - get /users/{id} (Response)
+ * - post /users (Response)
+ * - put /users/{id} (Response)
+ * - get /users/search (Response)
+ * - post /auth/login (Response)
+ * - post /auth/register (Response)
+ */
+export interface UserResponse {
+  user_id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  created_at: string /* RFC3339 */;
+  updated_at: string /* RFC3339 */;
+}
+
+/**
  * Address represents a physical address in API requests/responses
  */
 export interface Address {
@@ -203,29 +227,5 @@ export interface Address {
   state: string;
   postal_code: string;
   country: string;
-}
-
-/**
- * LoginForm represents a login form submission
- *
- * @api Used in the following endpoints:
- * - post /auth/login (Request)
- */
-export interface LoginForm {
-  user: string;
-  pass: string;
-  remember: boolean;
-}
-
-/**
- * MixedTagsStruct demonstrates priority between JSON and form tags
- */
-export interface MixedTagsStruct {
-  id: number;
-  name: string;
-  email: string;
-  json_only: string;
-  form_only: string;
-  NoTags: string;
 }
 

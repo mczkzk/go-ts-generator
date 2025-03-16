@@ -1,8 +1,28 @@
 // This file is auto-generated. Do not edit directly.
-// Generated at: 2025-03-16 20:28:54
+// Generated at: 2025-03-16 21:03:49
 // Note: This file includes both exported and unexported types and fields.
 
 /* eslint-disable */
+
+/**
+ * unexportedType is not exported
+ */
+/**
+ * Note: This is an unexported type. In Go code, it's defined with a lowercase identifier.
+ * It cannot be accessed directly from outside the package.
+ */
+export interface unexportedType {
+  /**
+   * Note: This is an unexported field. In Go code, it's defined with a lowercase identifier.
+   * It cannot be accessed directly from outside the package.
+   */
+  field1: string;
+  /**
+   * Note: This is an unexported field. In Go code, it's defined with a lowercase identifier.
+   * It cannot be accessed directly from outside the package.
+   */
+  field2: number;
+}
 
 /**
  * UserList represents a list of users
@@ -53,7 +73,7 @@ export interface Product {
   /**
    * Pointer type without omitempty
    */
-  category?: Category | null;
+  category: Category | null;
   created_at: string /* RFC3339 */;
 }
 
@@ -63,25 +83,5 @@ export interface Product {
 export interface Category {
   id: number;
   name: string;
-}
-
-/**
- * unexportedType is not exported
- */
-/**
- * Note: This is an unexported type. In Go code, it's defined with a lowercase identifier.
- * It cannot be accessed directly from outside the package.
- */
-export interface unexportedType {
-  /**
-   * Note: This is an unexported field. In Go code, it's defined with a lowercase identifier.
-   * It cannot be accessed directly from outside the package.
-   */
-  field1: string;
-  /**
-   * Note: This is an unexported field. In Go code, it's defined with a lowercase identifier.
-   * It cannot be accessed directly from outside the package.
-   */
-  field2: number;
 }
 

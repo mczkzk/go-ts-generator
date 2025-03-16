@@ -111,7 +111,7 @@ type CategoryMap map[int]*Category
 
 	// Check for pointer field handling
 	if !strings.Contains(tsContentStr, "address?: Address | null;") {
-		t.Error("Generated TypeScript does not handle pointer fields as optional and nullable")
+		t.Error("Generated TypeScript does not handle pointer fields with omitempty as optional and nullable")
 		t.Logf("Expected 'address?: Address | null;' but got something else in:\n%s", tsContentStr)
 	}
 

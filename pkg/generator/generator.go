@@ -213,7 +213,8 @@ func CollectTypeDefinitions(sourceDir string) ([]TypeScriptType, error) {
 
 											// Parse tags
 											jsonName := fieldName
-											optional := isPointer        // Pointer types are optional by default
+											optional := false            // Default to not optional
+											_ = isPointer                // We use isPointer elsewhere but not for optionality
 											var validationRules []string // Store validation rules for JSDoc
 											isRequired := false          // Track if the field is explicitly required
 
