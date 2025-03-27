@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/mo49/go-ts-generator/pkg/generator"
+	"github.com/mczkzk/go-ts-generator/pkg/generator"
 )
 
 // Version information

@@ -39,7 +39,7 @@ You can generate TypeScript types from one or multiple directories:
 
 ```bash
 # Install the tool
-go install github.com/mo49/go-ts-generator/cmd/go-ts-generator@latest
+go install github.com/mczkzk/go-ts-generator/cmd/go-ts-generator@latest
 
 # Generate from a single directory
 go-ts-generator ./examples/basic ./examples/basic/generated.ts

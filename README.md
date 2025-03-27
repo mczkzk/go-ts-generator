@@ -16,13 +16,13 @@ A Go module that generates TypeScript type definitions from Go struct definition
 ### As a command-line tool
 
 ```bash
-go install github.com/mo49/go-ts-generator/cmd/go-ts-generator@latest
+go install github.com/mczkzk/go-ts-generator/cmd/go-ts-generator@latest
 ```
 
 ### As a library
 
 ```bash
-go get github.com/mo49/go-ts-generator
+go get github.com/mczkzk/go-ts-generator
 ```
 
 ## Usage
@@ -53,7 +53,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/mo49/go-ts-generator/pkg/generator"
+	"github.com/mczkzk/go-ts-generator/pkg/generator"
 )
 
 func main() {
